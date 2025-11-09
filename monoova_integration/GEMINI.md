@@ -16,6 +16,16 @@ The architecture is event-driven, relying on webhooks for asynchronous status up
 *   **API Provider:** Monoova (Payments API v5.29)
 *   **Target Infrastructure:** AWS Lambda, API Gateway, S3, DynamoDB, Secrets Manager, SQS, CloudWatch.
 
+## Project Structure
+
+The project is organized into the following files and directories:
+
+*   `GEMINI.md`: This file. A living document providing an overview of the project.
+*   `requirements.md`: Details the functional requirements, user flows, and compliance analysis.
+*   `analysis.md`: Details the non-functional requirements (Security, Scalability, Reliability, etc.).
+*   `docs/`: Contains all documentation, including PlantUML source diagrams and their rendered PNG versions.
+*   `*.yaml`: The OpenAPI specifications for the Monoova APIs.
+
 ## Building and Running
 
 ### Dependencies
@@ -26,7 +36,13 @@ The project uses Python. Install the required packages using pip:
 pip install -r requirements.txt
 ```
 
-*(Note: The `requirements.txt` file needs to be created. It should contain `requests`.)*
+### Generating Diagrams
+
+To convert the PlantUML source files (`.plantuml`) in the `docs/` directory into PNG images, run the following Python script:
+
+```bash
+python render_diagrams.py
+```
 
 ### Running the Application
 

@@ -1,0 +1,39 @@
+@startuml
+title 1. Funding Flow (Revised)
+
+participant "Fiserv" as Fiserv
+participant "Your ANZ Accounts" as ANZ
+participant "Monoova Platform" as Monoova
+participant "Your Backend" as Backend
+
+skinparam sequenceMessageAlign center
+
+Fiserv -> ANZ: Deposits settlement funds
+activate ANZ
+
+ANZ -> Monoova: **Manual/Automated Transfer** \n (from your ANZ account to your Monoova mAccount)
+deactivate ANZ
+activate Monoova
+
+Monoova -> Monoova: Processes received funds and credits \n your primary mAccount balance
+
+alt If Automatcher configured for this transfer
+    Monoova -> Backend: **Webhook Notification** \n (Event: `InboundDirectCredit` or `NPPReceivePayment`)
+    activate Backend
+    note right
+      **Webhook Payload:**
+      {
+        "accountNumber": "YOUR_MONOOVA_ACCOUNT",
+        "amount": 50000.00,
+        "transactionDate": "...",
+        ...
+      }
+    end note
+    Backend -> Backend: Verify and process webhook
+    Backend -> Backend: Update internal balance/records (optional)
+    deactivate Backend
+end alt
+
+deactivate Monoova
+
+@enduml

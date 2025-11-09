@@ -15,8 +15,7 @@ Admin -> Website: Submits payout request (Customer, Amount)
 Website -> Backend: **POST /api/payouts**
 activate Backend
 
-Backend -> DB: Get customer's available balance 
- and payout destination details
+Backend -> DB: Get customer's available balance \nand payout destination details
 activate DB
 DB --> Backend: Return details
 deactivate DB
@@ -58,8 +57,7 @@ else Validation Succeeds
     Monoova --> Backend: HTTP 200 OK (Status: "Accepted")
     deactivate Monoova
 
-    Backend -> DB: Store transaction record with Monoova's 
- `uniqueReference` and set status to 'Processing'
+    Backend -> DB: Store transaction record with Monoova's \n `uniqueReference` and set status to 'Processing'
     activate DB
     DB --> Backend: Confirm storage
     deactivate DB
@@ -84,8 +82,7 @@ note right
   }
 end note
 
-Backend -> DB: Find transaction by `uniqueReference` 
- and update status to 'Completed'
+Backend -> DB: Find transaction by `uniqueReference` \nand update status to 'Completed'
 activate DB
 DB --> Backend: Confirm update
 deactivate DB

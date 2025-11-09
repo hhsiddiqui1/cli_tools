@@ -17,15 +17,15 @@ The system is composed of four primary flows:
 
 ### 1.2. Funding Flow (Getting Money In)
 
-Before payouts can be made, the business's Monoova account (mAccount) must be funded. The source of funds is the settlement from Fiserv.
+Before payouts can be made, the business's Monoova account (mAccount) must be funded. The source of funds is the settlement from Fiserv, which first lands in your ANZ accounts.
 
-1.  **Receive Fiserv Settlement:** Fiserv settles the collected transaction funds into a bank account. To automate reconciliation, this should be a **Monoova Automatcher account**.
-2.  **Automatcher Account:** We will create a dedicated Automatcher account using the `POST /receivables/v1/create` endpoint. This provides a unique BSB and Account Number.
-3.  **Provide Details to Fiserv:** This unique account number is provided to Fiserv as the settlement account.
-4.  **Webhook Notification:** When Fiserv deposits funds, Monoova will send an `InboundDirectCredit` or `NPPReceivePayment` webhook to a pre-configured endpoint in your backend.
-5.  **Credit mAccount:** The webhook notification confirms that funds have arrived and are available in your primary mAccount balance for payouts.
+1.  **Receive Fiserv Settlement:** Fiserv settles the collected transaction funds into your designated ANZ accounts.
+2.  **Internal Transfer to Monoova:** You will initiate a transfer of funds from your ANZ account to your Monoova mAccount. This can be done via a standard bank transfer.
+3.  **Monoova Receives Funds:** Monoova receives the funds into your primary mAccount.
+4.  **Webhook Notification (Optional):** If you have configured an Automatcher account for receiving these transfers, Monoova can send an `InboundDirectCredit` or `NPPReceivePayment` webhook to a pre-configured endpoint in your backend. This webhook would confirm that funds have arrived and are available in your primary mAccount balance for payouts.
+5.  **Credit mAccount:** Once funds are received by Monoova, they become available in your primary mAccount balance for making payouts.
 
-### 1.2. User & Payout Destination Management
+### 1.3. User & Payout Destination Management
 
 To pay customers, their payout destinations (bank accounts or PayIDs) must be securely stored.
 

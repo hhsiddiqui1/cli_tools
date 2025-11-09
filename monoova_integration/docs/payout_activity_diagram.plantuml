@@ -1,0 +1,41 @@
+@startuml
+title Payout Flow Logic (Activity Diagram)
+
+|Admin|
+start
+:Initiate Payout Request;
+
+|Backend|
+:Receive Payout Request;
+:Get Customer Balance & Payout Details;
+
+if (Request Valid?) then (yes)
+  :Generate Unique Transaction ID;
+  :Construct API Payload;
+  :Send "Execute Transaction" request to Monoova;
+
+  |Monoova|
+  :Process Request;
+
+  |Backend|
+  :Receive "Accepted" Response;
+  :Store Transaction Reference;
+  :Update Payout Status to 'Processing';
+  :Send "Submitted" status to Admin;
+
+  |Admin|
+  :View "In Progress" Status;
+
+  |Backend|
+  stop
+
+else (no)
+  :Log Validation Error;
+  :Send Error Message to Admin;
+
+  |Admin|
+  :View Validation Error;
+  stop
+endif
+
+@enduml
