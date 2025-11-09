@@ -1,0 +1,94 @@
+@startuml
+title 4. Payout Flow (Detailed)
+
+actor "Admin" as Admin
+participant "Your Website" as Website
+participant "Your Backend" as Backend
+database "Your Database" as DB
+participant "Monoova API" as Monoova
+
+skinparam sequenceMessageAlign center
+
+== Step 1: Payout Initiation ==
+
+Admin -> Website: Submits payout request (Customer, Amount)
+Website -> Backend: **POST /api/payouts**
+activate Backend
+
+Backend -> DB: Get customer's available balance 
+ and payout destination details
+activate DB
+DB --> Backend: Return details
+deactivate DB
+
+Backend -> Backend: **Validation Logic**
+note right
+  1. Amount <= Available Balance?
+  2. Amount <= $1000 limit?
+  3. Payout destination valid?
+end note
+
+alt Validation Fails
+    Backend --> Website: HTTP 400 Bad Request (with error message)
+    Website --> Admin: Show validation error
+else Validation Succeeds
+    Backend -> Backend: Generate unique reference for the transaction
+
+    == Step 2: API Call ==
+
+    Backend -> Monoova: **POST /financial/v2/transaction/execute**
+    activate Monoova
+    note right
+      **Payload (NPP Example):**
+      {
+        "callerUniqueReference": "payout-ref-xyz123",
+        "source": { "accountNumber": "YOUR_mACCOUNT" },
+        "disbursements": [
+          {
+            "uniqueReference": "cust-payout-abc456",
+            "npp": {
+              "to": { "payId": { "payId": "customer@example.com", "payIdType": "Email" } }
+            },
+            "amount": 950.00,
+            "description": "Your payout"
+          }
+        ]
+      }
+    end note
+    Monoova --> Backend: HTTP 200 OK (Status: "Accepted")
+    deactivate Monoova
+
+    Backend -> DB: Store transaction record with Monoova's 
+ `uniqueReference` and set status to 'Processing'
+    activate DB
+    DB --> Backend: Confirm storage
+    deactivate DB
+
+    Backend --> Website: HTTP 202 Accepted
+    deactivate Backend
+    Website --> Admin: Show "Payout submitted successfully"
+end
+
+... Sometime later ...
+
+== Step 3: Asynchronous Confirmation ==
+
+Monoova -> Backend: **Webhook: NppPaymentStatus**
+activate Backend
+note right
+  **Webhook Payload:**
+  {
+    "uniqueReference": "payout-ref-xyz123",
+    "status": "Completed",
+    ...
+  }
+end note
+
+Backend -> DB: Find transaction by `uniqueReference` 
+ and update status to 'Completed'
+activate DB
+DB --> Backend: Confirm update
+deactivate DB
+deactivate Backend
+
+@enduml

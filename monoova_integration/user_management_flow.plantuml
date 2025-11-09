@@ -1,0 +1,29 @@
+@startuml
+title 2. User & Payout Destination Management Flow
+
+actor "Admin" as Admin
+participant "Your Website" as Website
+participant "Your Backend" as Backend
+database "Your Database" as DB
+
+skinparam sequenceMessageAlign center
+
+Admin -> Website: Navigates to "Add Customer" page
+Admin -> Website: Fills in customer details and 
+payout information (Bank Account or PayID)
+Website -> Backend: **POST /api/customers**
+activate Backend
+
+Backend -> Backend: Validate input data
+Backend -> DB: Securely store customer and payout info 
+ (Encrypt sensitive data)
+activate DB
+DB --> Backend: Confirm storage
+deactivate DB
+
+Backend --> Website: HTTP 201 Created
+deactivate Backend
+
+Website --> Admin: Show "Customer successfully created"
+
+@enduml

@@ -1,0 +1,2790 @@
+openapi: 3.0.0
+servers:
+  - url: https://api.monoova.com
+    description: Production URL#
+  - url: https://sand-api.monoova.com
+    description: Sandbox URL
+info:
+  description: |
+    # Introduction
+      Monoova's Online Card Payment Service incorporates a next-gen Card Payment Checkout integrated with our expansive Payments API to allow merchants to capture card and mobile wallet payments from your customers online and receive funds into your Monoova account for automated reconciliation and disbursement. To integrate the Card Payment Gateway into your website, all you need is Monoova's <a href="https://github.com/Monoova/merchantSDK" target='_blank'>Merchant Software Development Kit</a> (SDK) hosted on GitHub and a set of straightforward RESTful APIs detailed below.  We will continue to update this API documentation as we release additional functionality.
+
+    # How to Enable the Card Payment Gateway and Sandbox API’s
+    >
+      - If not already a user, register an account in our <a href='https://sandbox.monoova.com' target='_blank'>Sandbox Portal</a>
+      - Once registered and logged in, navigate to **Manage > API Gateway** and input your API Key (provided to you as part of Portal user registration) to activate API Gateway Access for your mAccount (If you do not know your API Key you will need to roll a new one, this can be done by navigating to **Manage > Accounts**)
+      - Card Gateway integration requires some additional back-end configuration prior to use by a member of our integration team who will reach out to onboard and confirm access as a final step to enabling your service.
+      - To notify the integration team of your interest in enabling your account for Online Card Payment Service functionality, please <a href='https://www.monoova.com/contact' target="_blank">Contact us</a> and a member of the team will follow up to guide you through the final steps.
+
+    # Integrating Monoova Checkout for Card Payments
+      Utilizing Monoova's Merchant SDK enables you to deploy a Card Payment Checkout that securely gathers card payment information that complies with PCI standards, without necessitating substantial PCI compliance modifications within your application. The integrated Card Payment Checkout implementation ensures the secure capture of card data and offers complete customization to seamlessly align with your application's appearance and user experience.
+
+    ## Before you start
+    >
+      - Ensure that your mAccount has been properly configured to enable card payments. Please access the Monoova portal or contact Monoova Support to verify this.
+      - Download the Card Software Development Kit (SDK): https://github.com/Monoova/merchantSDK
+
+    ## Using the Merchant SDK
+      To begin, clone the Merchant SDK repository. This repository offers an example implementation of the set of tools for initiating a session with Monoova and presenting the credit card checkout for the collection of card payments. Detailed instructions on how to integrate the credit card checkout are included in the SDK.
+
+    ## Sample Card Details
+      The following Card details can be used to test the credit card checkout and end-to-end flow in your Sandbox Account.
+    <table>
+      <tr>
+        <th>Card Type</th>
+        <th>Card Number</th>
+        <th>Card Expiry</th>
+        <th>Card CVV</th>
+      </tr>
+      <tr>
+        <td>VISA</td>
+        <td>4111 1111 1111 1111</td>
+        <td>12/31</td>
+        <td>123</td>
+      </tr>
+      <tr>
+        <td>MASTER CARD</td>
+        <td>5555 5555 5555 4444</td>
+        <td>12/31</td>
+        <td>123</td>
+      </tr>
+    </table>
+
+    ## Customising the Checkout
+    >
+      - For those using the provided checkout form, you can make adjustments to the appearance of the checkout by editing the Checkout.html and style.css files to apply host themes.
+      - To modify the styles within the card iframe, you should edit the CSS associated with the #Checkout-container ID, as host themes do not apply to the card form.
+      - Refer to our README documentation in the Card Software Development Kit (SDK). It includes programmatic examples, including checkout style and callback details, for the events
+        * onCheckoutComplete
+        * onCheckoutFail
+
+  version: v1
+  title: Monoova Card Payments API
+
+  contact:
+    name: Monoova Support
+    email: support@monoova.com
+    url: https://www.monoova.com
+  x-logo:
+    url: 'https://movdpwebsiteprodae.blob.core.windows.net/images/Monoova-Primary-Logo-Black-RGB.png'
+    altText: Monoova logo
+
+tags:
+  - name: Webhooks
+    description: <p>
+      In addition to callable reporting endpoints, webhooks will also be available for state changes for payment agreements and funds received.
+      </p>
+      </br></br>
+
+  - name: Monoova Error Codes
+    description: <style type="text/css">
+      .tb { table-layout:auto; width:300px;!important }
+      .td { overflow:hidden; white-space:nowrap; text-overflow:ellipsis!important}
+      </style>
+      <table class="tb">
+      <tr>
+      <th> HTTP Status </th>
+      <th> Error Code </th>
+      <th> Meaning </th>
+      </tr>
+
+      <tr><td>	400	</td><td>	CCM_ACCTID_REQUIRED	</td><td>	maccount is required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_DISABLED_ERROR	</td><td>	Card transactions disabled for accountId {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_EXISTS	</td><td>	Failed to create account - account already exists	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_LIMIT_REACHED	</td><td>	transaction amount {0} plus existing transactions {1} exceeds limit {2}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_NOT_FOUND_ERROR	</td><td>	account not found for accountId {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_UID_NOT_UNIQUE	</td><td>	More than one account {0} is found	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_ACC_UPDATE_ERROR	</td><td>	Documents modified {0}. Expected exactly 1 account updated.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_AMOUNT_INVALID	</td><td>	{0} must be between 0 and {1}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_AMOUNT_REQUIRED	</td><td>	{0}.currencyAmount required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_BILLADDR_REQUIRED	</td><td>	{0}.billingAddress required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_BUSINESS_RULE_ERROR	</td><td>	startdate invalid	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CARDTYPE_REQUIRED	</td><td>	{0}.cardType required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CC_GATEWAY_ERROR	</td><td>	Error returned from CC gateway - {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CC_GWM_ERROR	</td><td>	Error returned from CC Gateway Manager - {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_COUNTRY_INVALID	</td><td>	{0}.countryCode must be valid ISO 2 character code	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_COUNTRY_REQUIRED	</td><td>	{0}.countryCode required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CRTD_ENDDATE_INVALID	</td><td>	createdEndDate must be later than createdStartDate	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CRTD_STARTDATE_INVALID	</td><td>	createdStartDate must be past time	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CRTD_STARTDATE_REQUIRED	</td><td>	createdStartDate is mandatory	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_CUSTOMER_REQUIRED	</td><td>	customer required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_DESC_INVALID	</td><td>	{0}.description [{PropertyValue}] must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_DESC_LENGTH	</td><td>	{0}.description must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_DESC_REQUIRED	</td><td>	{0}.description required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_DETAILS_REQUIRED	</td><td>	paymentDetails required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMAIL_INVALID	</td><td>	{0}.emailAddress [{PropertyValue}] must be valid email address	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMAIL_MAXLEN	</td><td>	{0}.emailAddress cannot exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMAIL_REQUIRED	</td><td>	{0}.emailAddress required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMPTY_BATCH_ID	</td><td>	Empty BatchId.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMPTY_SETTLEMENTS_LIST	</td><td>	Empty settlements list.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMPTY_SETTLEMENT_DUPLICATE	</td><td>	Empty settlement duplicate.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMPTY_SETTLEMENT_ORIGINAL	</td><td>	Empty settlement original.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_EMPTY_TRANSACTION_UNIQUE_REFERENCE	</td><td>	Empty TransactionUniqueReference.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_FIRSTNAME_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_FIRSTNAME_LENGTH	</td><td>	{0}.firstName must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_FIRSTNAME_REQUIRED	</td><td>	{0}.firstName required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_FUNDS_DECLINED	</td><td>	Funds reservation failed	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_JOBID_INVALID	</td><td>	Async Job Id is not valid Guid - must use the UniqueRequestId returned by the originating call	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_JOB_EXISTS	</td><td>	Failed to create AsyncJob - request already exists	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_JOB_EXPIRED	</td><td>	Async job failed to complete within a reasonable time	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_LASTNAME_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_LASTNAME_LENGTH	</td><td>	{0}.lastName must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_LASTNAME_REQUIRED	</td><td>	{0}.lastName required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MAPPING_ERROR	</td><td>	Internal error - property {0} value {1} is invalid - expected one of [{2}]. Please contact Monoova support.	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_ADDR_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_CAT_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_CAT_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_COUNTRY_NOTFOUND	</td><td>	{0}.{PropertyName} '{PropertyValue}' is not valid	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_COUNTRY_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_EMAIL_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_EMAIL_LENGTH	</td><td>	{0}.{PropertyName} '{PropertyValue}' must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_EMAIL_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_IND_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_NAME_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_NAME_LENGTH	</td><td>	{0}.{PropertyName} must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_NAME_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_PHONE_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_PHONE_LENGTH	</td><td>	{0}.{PropertyName} '{PropertyValue}' must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_POSTCODE_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_POSTCODE_NOTFOUND	</td><td>	{0}.PostalCode is not defined for specified country	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_POSTCODE_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STATE_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STATE_NOTFOUND	</td><td>	{0}.State is not defined for specified country	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STATE_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STREET_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STREET_LENGTH	</td><td>	{0}.{PropertyName} must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_STREET_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_SUBURB_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_SUBURB_LENGTH	</td><td>	{0}.{PropertyName} must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_MRCH_SUBURB_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PARENTUID_INVALID	</td><td>	{0}.clientParentTransactionUniqueReference {PropertyValue} must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PARENTUID_REQUIRED	</td><td>	{0}.clientParentTransactionUniqueReference required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PCT_PREPAID_INVALID	</td><td>	{0}.{PropertyName} value {PropertyValue} must be between {From} and {To}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PCT_PREPAID_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PG_NUM_INVALID	</td><td>	pageNumber must be greater than zero	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PG_SZ_INVALID	</td><td>	pageSize must be between 1 and {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_POSTCODE_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_POSTCODE_LENGTH	</td><td>	{0}.postalCode must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_POSTCODE_REQUIRED	</td><td>	{0}.postalCode required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PPDAYS_INVALID	</td><td>	{0}.{PropertyName} value {PropertyValue} cannot be less than {ComparisonValue}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_PPDAYS_REQUIRED	</td><td>	{0}.{PropertyName} required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REASON_INVALID	</td><td>	{0}.refundReason [{PropertyValue}] must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REFUND_LIMIT_EXCEEDED	</td><td>	refundAmount {0} exceeds available amount {1}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REFUND_REJECTED	</td><td>	"Refund rejected by payment processor
+      400,CCM_REF_EXISTING,existing refund status {0} is not yet finalised"""	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REF_INVALID_STATUS	</td><td>	parent transaction status {0} invalid for refund </td></tr>
+      <tr><td>	400	</td><td>	CCM_REF_TOO_LATE	</td><td>	the allowable refund period has expired for this transaction	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REQUEST_EMPTY	</td><td>	request payload is empty	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_REQ_BODY_INVALID	</td><td>	Error parsing badly formed request message - {0}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STATE_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STATE_LENGTH	</td><td>	{0}.state must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STATE_REQUIRED	</td><td>	{0}.state required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STATUS_INVALID	</td><td>	Status {PropertyValue} is invalid - must be one of [{0}]	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STREET_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STREET_LENGTH	</td><td>	{0}.street must not exceed maximum length 37 for Amex or 60 for Visa/Mastercard	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STREET_MAX_LINES	</td><td>	{0}.street cannot exceed 2 lines	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STREET_MIN_LINES	</td><td>	{0}.street must contain at least 1 line	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_STREET_REQUIRED	</td><td>	{0}.street required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_SUBURB_INVALID	</td><td>	{0}.{PropertyName} '{PropertyValue}' invalid. Must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_SUBURB_LENGTH	</td><td>	{0}.suburb must not exceed {MaxLength}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_SUBURB_REQUIRED	</td><td>	{0}.suburb required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_TRN_EXISTS	</td><td>	Failed to create CreditCardTransaction - transaction already exists	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_UID_INVALID	</td><td>	{0}.clientTransactionUniqueReference {PropertyValue} must match {RegularExpression}	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_UID_REQUIRED	</td><td>	{0}.clientTransactionUniqueReference required	 </td></tr>
+      <tr><td>	400	</td><td>	CCM_VALIDATION_ERROR	</td><td>	Error validating request message - {0}	 </td></tr>
+      <tr><td>	404	</td><td>	CCM_ACC_NOT_FOUND_ERROR	</td><td>	account not found for accountId {0}	 </td></tr>
+      <tr><td>	404	</td><td>	CCM_JOB_NOT_FOUND_ERROR	</td><td>	AsyncJob with RequestId {0} not found	 </td></tr>
+      <tr><td>	404	</td><td>	CCM_LINK_NOT_FOUND_ERROR	</td><td>	CreditCardTransaction not found for PaymentGateway {0} / GatewayTransactionId {1}	 </td></tr>
+      <tr><td>	404	</td><td>	CCM_TRNUID_NOT_FOUND_ERROR	</td><td>	CreditCardTransaction not found for TransactionUniqueReference {0}	 </td></tr>
+      <tr><td>	404	</td><td>	CCM_TRN_NOT_FOUND_ERROR	</td><td>	CreditCardTransaction not found for Account {0} / clientTransactionUniqueReference {1}	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_ACC_CREATE_ERROR	</td><td>	Failed to create account in repository	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_DUPLICATED_SETTLEMENT_CREATE_ERROR	</td><td>	Failed to create duplicated settlement in repository	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_FAILED_TRANSACTION_CREATE_ERROR	</td><td>	Failed to create failed transaction in repository	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_INVALID_DATE_ONLY_STRING	</td><td>	{0} Invalid DateOnly string {1}. Expected yyyy-MM-dd	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_JOB_CREATE_ERROR	</td><td>	Failed to create AsyncJob in repository	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_JOB_UPDATE_ERROR	</td><td>	Documents modified {0}. Expected exactly 1 AsyncJob updated.	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_TRNUID_NOT_UNIQUE	</td><td>	More than one TransactionUniqueReference {0} is found	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_TRN_CREATE_ERROR	</td><td>	Failed to create transaction in repository	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_TRN_NOT_UNIQUE	</td><td>	More than one AccountId {0} / clientTransactionUniqueReference {1} is found	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_TRN_UPDATE_ERROR	</td><td>	Documents modified {0}. Expected exactly 1 CreditCardTransaction updated.	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_UID_CREATE_ERROR	</td><td>	Failed to allocate transaactionUniqueReference	 </td></tr>
+      <tr><td>	500	</td><td>	CCM_UNEXPECTED_ERROR	</td><td>	Internal server error. Please contact Monoova support.	 </td></tr>
+      <tr><td>	504	</td><td>	CCM_CC_GATEWAY_TIMEOUT	</td><td>	Timeout from CC gateway	 </td></tr>
+      <tr><td>	504	</td><td>	CCM_CC_GWM_TIMEOUT	</td><td>	Timeout from CC Gateway Manager	 </td></tr>
+      </table>
+
+x-tagGroups:
+  - name: ''
+    tags:
+      - Generate a Bearer Token
+      - Generate a Client Session
+      - Get Transaction By Id
+      - Get Transaction By Date Range
+      - Request Refund Transaction
+      - Get Async Request Status
+      - Create Payment Using Token
+      - Get Payment Method Token Details
+      - Update Payment Method Token Status
+      - Webhooks
+      - Monoova Error Codes
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Generate Client Session
+  '/au/card/ccm/CreditCardTransaction/token':
+    post:
+      tags:
+        - Generate a Client Session
+      summary: Generate a Client Session
+      description: This endpoint is used to generate a client session token which is required to render the payment screen. All the fields are mandatory and will be passed on to the issuer while creating payments.</br>
+      operationId: generate-clientSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientSessionDto'
+            example:
+              clientTransactionUniqueReference: '6aac85b115c7405180e6c7a7735c9f3c'
+              customer:
+                billingAddress:
+                  firstName: 'Joseph'
+                  lastName: 'Blogs'
+                  street: ['1 Walker St']
+                  suburb: 'North Sydney'
+                  state: 'NSW'
+                  postalCode: '2000'
+                  countryCode: 'AU'
+                emailAddress: 'joe.blogs@monoova.com'
+                customerId: '12345678'
+                firstName: 'Joseph'
+                lastName: 'Blogs'
+              paymentDetails:
+                cardType: 'Visa'
+                description: 'sample token create'
+                saveOnSuccess: true
+                clientPaymentTokenUniqueReference: 'my-visa-card'
+                capturePayment: true
+                applySurcharge: false
+              amount:
+                currencyAmount: 100.00
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateClientSessionResponse'
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '0d4518e0-8934-489c-b303-1f82323f2595',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_ACC_LIMIT_REACHED',
+                        'errorMessage': 'transaction amount 100.00 plus existing transactions 100.00 exceeds limit 50'
+                      }
+                    ]
+                }
+
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'fb2d673d-3c5a-408e-8d3c-76f7c4ac2aca',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_UNEXPECTED_ERROR',
+                        'errorMessage': 'Internal server error. Please contact Monoova support.'
+                      }
+                    ]
+                }
+
+  #Create Payment Using Token
+  '/au/card/ccm/CreditCardTransaction/payment':
+    post:
+      tags:
+        - Create Payment Using Token
+      summary: Create a Payment using Token
+      description: This endpoint is used to create payments using tokens.
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+            example:
+              clientTransactionUniqueReference: '6aac85b115c7405180e6c7a7735c9f3c'
+              customer:
+                customerId: '12345678'
+                billingAddress:
+                  firstName: 'Joseph'
+                  lastName: 'Blogs'
+                  street:
+                    - '1 Walker St'
+                  suburb: 'North Sydney'
+                  state: 'NSW'
+                  postalCode: '2000'
+                  countryCode: 'AU'
+                emailAddress: 'joe.blogs@monoova.com'
+              paymentDetails:
+                clientPaymentTokenUniqueReference: 'Token123'
+                description: 'sample token create'
+              amount:
+                currencyAmount: 100.00
+      responses:
+        '201':
+          description: Accepted by gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+              example:
+                traceId: '1dabfaa9-abe8-4d2d-a69a-b723079d84ed'
+                clientTransactionUniqueReference: 'DCCCC5DE-CC48-4942-A419-F1B84EC122C4'
+                clientPaymentTokenUniqueReference: 'TOKEN123'
+                status: 'Pending Settlement'
+        '200':
+          description: Declined by gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+              example:
+                traceId: '1dabfaa9-abe8-4d2d-a69a-b723079d84ed'
+                clientTransactionUniqueReference: 'DCCCC5DE-CC48-4942-A419-F1B84EC122C4'
+                clientPaymentTokenUniqueReference: 'TOKEN123'
+                status: 'Declined'
+                statusReasonCode: 'reasonCode'
+                statusReasonDescription: 'reasonDescription'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                traceId: '0d4518e0-8934-489c-b303-1f82323f2595'
+                errors:
+                  - errorCode: 'CCM_ACC_LIMIT_REACHED'
+                    errorMessage: 'transaction amount 100.00 plus existing transactions 100.00 exceeds limit 50'
+
+  # Get Transaction By Id
+  '/au/card/ccm/CreditCardTransaction/{clientTransactionUniqueReference}':
+    get:
+      tags:
+        - Get Transaction By Id
+      summary: Get Transaction By Id
+      description: This endpoint can be used to get details of payments and refunds. clientTransactionUniqueReference used to initiate these transactions can be used to get details.</br>
+      operationId: get-transaction-by-id
+      parameters:
+        - name: clientTransactionUniqueReference
+          in: path
+          required: true
+          schema:
+            type: string
+            description: ClientTransactionUniqueReference must be associated with a payment that was initiated using <a href='/cards#tag/Generate-a-Client-Session/operation/generate-clientSession'> Generate a Client Session</a> <br/>
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardTransactionDetailsResponse'
+              example:
+                {
+                  'creditCardTransactionDetails':
+                    {
+                      'clientTransactionUniqueReference': 'b6ec1fb0-e862-4dcd-a951-de6ebd91e7fc',
+                      'transactionId': 'TX7891011',
+                      'customerId': 'C123456',
+                      'creationDateTime': '2023-03-02T06:29:20.175Z',
+                      'transactionInitiationDateTime': '2023-03-02T06:29:26.175Z',
+                      'amount': { 'currencyAmount': 10.0 },
+                      'surchargeAmount': { 'currencyAmount': 1.0 },
+                      'paymentDetails':
+                        {
+                          'cardType': 'Visa',
+                          'description': 'sample token create',
+                          'clientPaymentTokenUniqueReference': 'T12345678',
+                          'saveOnSuccess': true
+                        },
+                      'transactionType': 'Payment',
+                      'status': 'Authorized',
+                      'statusReasonCode': '00',
+                      'statusReasonDescription': 'Transaction completed successfully',
+                      'refundStatus': 'Not Applicable',
+                      'settlementDateTime': '2023-03-04T04:02:27.061Z',
+                      'settlementBatchId': 'SB12345',
+                      'clientParentTransactionUniqueReference': 'b6ec1fb0-e862-4dcd-a951-de6ebd91e7fd',
+                      'refundTransactions':
+                        [
+                          {
+                            'clientTransactionUniqueReference': 'r6ec1fb0-e862-4dcd-a951-de6ebd91e7f1',
+                            'clientParentTransactionUniqueReference': 'b6ec1fb0-e862-4dcd-a951-de6ebd91e7fc',
+                            'transactionId': 'TX7891012',
+                            'creationDateTime': '2023-03-05T08:00:00.000Z',
+                            'transactionInitiationDateTime': '2023-03-03T04:02:27.061Z',
+                            'settlementDateTime': '2023-03-03T04:02:27.061Z',
+                            'amount': { 'currencyAmount': 50.25 },
+                            'surchargeAmount': { 'currencyAmount': 0.5 },
+                            'paymentDetails':
+                              {
+                                'cardType': 'Visa',
+                                'description': 'Refund for coffee shop purchase'
+                              },
+                            'transactionType': 'Refund',
+                            'status': 'Pending',
+                            'statusReasonCode': '01',
+                            'statusReasonDescription': 'Refund in process',
+                            'settlementBatchId': 'SB12346'
+                          }
+                        ],
+                      'cardDetails':
+                        {
+                          'expirationMonth': '12',
+                          'expirationYear': '2026',
+                          'last4Digits': '1111',
+                          'first6Digits': '407220',
+                          'cardholderName': 'Jane Doe',
+                          'cardType': 'VISA',
+                          'issuerCountryCode': 'AU',
+                          'issuerName': 'ANZ'
+                        }
+                    },
+                  'authenticationDetails':
+                    { 'responseCode': 'AUTH_SUCCESS', 'challengeIssued': true },
+                  'riskDetails':
+                    { 'preAuthorizationResult': 'FAILED', 'postAuthorizationResult': 'ACCEPT' },
+                  'traceId': 'cb9facce-0239-46bd-a823-16fa4191f87e'
+                }
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '0d4518e0-8934-489c-b303-1f82323f2595',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_ACC_LIMIT_REACHED',
+                        'errorMessage': 'transaction amount 100.00 plus existing transactions 100.00 exceeds limit 50'
+                      }
+                    ]
+                }
+
+  # Get Transaction By Date Range
+  '/au/card/ccm/CreditCardTransaction/':
+    get:
+      tags:
+        - Get Transaction By Date Range
+      summary: Get Transaction By Date Range
+      description: This API endpoint can be used to get details of transactions created in a date range</br>
+      operationId: get-transaction-by-date-range
+      parameters:
+        - name: createdStartDate
+          in: query
+          required: true
+          schema:
+            type: string
+            description: ISO 8601 formatted DateTime. <br/> transaction creation DateTime from which the query will start. If time is not provided it will be defaulted to midnight.<br/> Must not be future date
+
+        - name: createdEndDate
+          in: query
+          required: false
+          schema:
+            type: string
+            description: ISO 8601 formatted DateTime <br/> transaction creation DateTime cutoff for query. If time is not provided it will be defaulted to midnight. <br/> Must not be earlier than createdStartDate
+
+        - name: pageNumber
+          in: query
+          required: false
+          schema:
+            type: integer
+            description: current page number for the results
+            minimum: 1
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            description: current page number for the results
+            minimum: 1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardTransactionDetailsResponse'
+              example:
+                {
+                  'creditCardTransactionDetails':
+                    [
+                      {
+                        'clientTransactionUniqueReference': '23E3F5F3-016F-4BF2-8C97-7322F1CB410D',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T04:22:19.305Z',
+                        'transactionInitiationDateTime': '2023-09-20T04:23:14.401Z',
+                        'amount': { 'currencyAmount': 100.0 },
+                        'surchargeAmount': { 'currencyAmount': 1.0 },
+                        'paymentDetails':
+                          {
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_5435',
+                            'cardType': 'Visa',
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Pending Settlement'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'AB9FB2C9-9281-4F4C-97C5-675C1432CDB7',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T04:26:36.477Z',
+                        'transactionInitiationDateTime': '2023-09-20T04:27:05.084Z',
+                        'amount': { 'currencyAmount': 102.0 },
+                        'paymentDetails':
+                          {
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_5470',
+                            'cardType': 'Visa',
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Pending Settlement'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'E24547D0-8492-4E1F-A986-E7AF28F1D445',
+                        'customerId': 'Customer456',
+                        'creationDateTime': '2023-09-20T04:30:38.201Z',
+                        'transactionInitiationDateTime': '2023-09-20T04:31:07.008Z',
+                        'amount': { 'currencyAmount': 104.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Mastercard',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_5652',
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Pending Settlement'
+                      },
+                      {
+                        'clientTransactionUniqueReference': '5A08021A-0699-4BA3-9489-BBEE2B5F3F31',
+                        'customerId': 'Customer456',
+                        'creationDateTime': '2023-09-20T04:33:53.249Z',
+                        'transactionInitiationDateTime': '2023-09-20T04:34:29.21Z',
+                        'amount': { 'currencyAmount': 105.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Mastercard',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_5333',
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Pending Settlement'
+                      },
+                      {
+                        'clientTransactionUniqueReference': '347B5DE7-B61C-4625-87A6-3499ABB0AD8C',
+                        'creationDateTime': '2023-09-20T05:38:01.403Z',
+                        'transactionInitiationDateTime': '2023-09-20T05:38:49.741Z',
+                        'amount': { 'currencyAmount': 1.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Visa',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_5543',
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Pending Settlement'
+                      },
+                      {
+                        'clientTransactionUniqueReference': '42C9C5A7-1003-49CE-920B-174501C08228',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T05:40:39.992Z',
+                        'transactionInitiationDateTime': '2023-09-20T05:41:15.748Z',
+                        'amount': { 'currencyAmount': 2.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Mastercard',
+                            'saveOnSuccess': false,
+                            'description': 'sample token create'
+                          },
+                        'transactionType': 'Payment',
+                        'status': 'Authorized'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'REAB873C38-0528-40AB-AC76-1C5C5831CBE5',
+                        'clientParentTransactionUniqueReference': 'AB873C38-0528-40AB-AC76-1C5C5831CBE5',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T06:01:16.701Z',
+                        'transactionInitiationDateTime': '2023-09-20T06:01:23.948Z',
+                        'amount': { 'currencyAmount': 1.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Visa',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_6541',
+                            'description': 'Not Applicable'
+                          },
+                        'transactionType': 'Refund',
+                        'status': 'Pending'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'RE9D4E32EB-027B-4117-92EA-4B9245DD8880',
+                        'clientParentTransactionUniqueReference': '9D4E32EB-027B-4117-92EA-4B9245DD8880',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T06:35:30.335Z',
+                        'transactionInitiationDateTime': '2023-09-20T06:35:34.651Z',
+                        'amount': { 'currencyAmount': 2.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Mastercard',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_1435',
+                            'description': 'Not Applicable'
+                          },
+                        'transactionType': 'Refund',
+                        'status': 'Pending'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'RE526E4A51-3829-4DB6-A831-FA90D42418E8',
+                        'clientParentTransactionUniqueReference': '526E4A51-3829-4DB6-A831-FA90D42418E8',
+                        'customerId': 'Customer987',
+                        'creationDateTime': '2023-09-20T06:37:16.176Z',
+                        'transactionInitiationDateTime': '2023-09-20T06:37:19.397Z',
+                        'amount': { 'currencyAmount': 2.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Mastercard',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_8435',
+                            'description': 'Not Applicable'
+                          },
+                        'transactionType': 'Refund',
+                        'status': 'Pending'
+                      },
+                      {
+                        'clientTransactionUniqueReference': 'RE6BA001B7-79D6-49EC-9748-8C61059685FC',
+                        'clientParentTransactionUniqueReference': '6BA001B7-79D6-49EC-9748-8C61059685FC',
+                        'customerId': 'Customer123',
+                        'creationDateTime': '2023-09-20T07:05:18.298Z',
+                        'transactionInitiationDateTime': '2023-09-20T07:05:24.307Z',
+                        'amount': { 'currencyAmount': 20.0 },
+                        'paymentDetails':
+                          {
+                            'cardType': 'Visa',
+                            'saveOnSuccess': true,
+                            'clientPaymentTokenUniqueReference': 'Token_3395',
+                            'description': 'Not Applicable'
+                          },
+                        'transactionType': 'Refund',
+                        'status': 'Pending'
+                      }
+                    ],
+                  'traceId': 'f721dec7-445e-4e21-b953-713a1fc182a6'
+                }
+
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '0d4518e0-8934-489c-b303-1f82323f2595',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_ACC_LIMIT_REACHED',
+                        'errorMessage': 'transaction amount 100.00 plus existing transactions 100.00 exceeds limit 50'
+                      }
+                    ]
+                }
+
+  '/au/card/ccm/PaymentMethodToken':
+    get:
+      tags:
+        - Get Payment Method Token Details
+      summary: Get Payment Method Token Details
+      description: This endpoint can be used to get details of payment method tokens created using the payment method token vaulting.
+      operationId: getPaymentMethodTokenDetails
+      parameters:
+        - name: createdStartDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Start date in ISO 8601 DateTime format. Required unless customerId is provided.
+        - name: createdEndDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: End date in ISO 8601 DateTime format.
+        - name: customerId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Customer ID. Required unless createStartDate is provided.
+        - name: clientPaymentTokenUniqueReference
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Client Payment Token Unique Reference.
+        - name: pageNumber
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Start page for retrieval.
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+          description: Maximum number of records to return.
+      responses:
+        '200':
+          description: Payment method token details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodTokenDetailsResponse'
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '660ed149-61db-4644-acd0-5510dc840854',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_PM_DISABLED_ERROR',
+                        'errorMessage': 'PaymentMethodTokens disabled for accountId '
+                      }
+                    ]
+                }
+
+  # Request Refund Transaction (Async)
+  '/au/card/ccm/CreditCardTransactionAsync/refund':
+    post:
+      tags:
+        - Request Refund Transaction
+      summary: Request Refund Transaction (Async)
+      description:
+        This endpoint can be used to request a refund of the payment. This is an asynchronous process and can take up to 3 business days.  This request can be raised for both settled and unsettled payments.
+        </br>
+        A webhook will be initiated to notify customers about the status change.
+        </br>
+        For settled payments, a separate refund transaction will be created. Original payment status will not be affected. Partial refunds are supported. Multiple partial refund requests can be initiated for payment as long as the total of the refund amount does not exceed the original payment value and another refund request is not in progress for the same payment.
+        </br></br>
+        The status of the refund can be checked using the <a href='cards#tag/Get-Transaction-By-Id'>Credit Card - Get Transaction By Id</a> endpoint or <a href="/cards#tag/Get-Transaction-By-Id">Credit Card - Get Async Request Status.</a> </br>We also initiate a webhook when the refund status is finalized(Settlement Complete/Failed/Declined).
+      operationId: request-refund-transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundResponse'
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '9a74c22b-f9ab-46a5-b171-cecc86f4f307',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_PARENTUID_REQUIRED',
+                        'errorMessage': 'clientParentTransactionUniqueReference required'
+                      }
+                    ]
+                }
+
+  #Get Async Request Status
+  '/au/card/ccm/CreditCardTransactionAsync/request/{uniqueRequestId}':
+    get:
+      tags:
+        - Get Async Request Status
+      summary: Get Async Request Status
+      description:
+        This endpoint can be used to get the status of the asynchronous refund request. The final status of the asynchronous request is marked as completed after we successfully initiate a refund request from our side. This does not indicate the status of the settlement process and money movement in case of a refund.
+        <br/> Inorder to get the detailed status of the refund request , please use the <a href="/cards#operation/get-transaction-by-id" >Credit Card - Get Transaction By Id</a> or <a href="/cards#operation/get-transaction-by-date-range">Credit Card - Get Transaction By Date Range.</a>
+        <br/>
+      operationId: async-request-status
+      parameters:
+        - name: uniqueRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncStatusResponse200'
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncStatusResponse201'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': '46500c7a-5516-4040-9f33-4137bb496755',
+                  'errors':
+                    [
+                      {
+                        'errorCode': 'CCM_JOBID_INVALID',
+                        'errorMessage': 'Async Job Id is not valid Guid - must use the UniqueRequestId returned by the originating call'
+                      }
+                    ]
+                }
+        '422':
+          description: Async Request Failed
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'c0905f60-80b7-4a6a-abe3-0207b3e19b8e',
+                  'uniqueRequestId': '595a3202-e9aa-406e-a2a3-5efb6ca8b72a',
+                  'clientTransactionUniqueReference': 'MONCC1673930138',
+                  'status': 'Failed',
+                  'errorCode': 'CCM_CC_GWM_ERROR',
+                  'errorMessage': 'Mandatory field is missing - payment_initiator_information.party_name.'
+                }
+
+  '/au/card/ccm/PaymentMethodToken/{customerId}/{clientPaymentTokenReference}':
+    patch:
+      tags:
+        - Update Payment Method Token Status
+      summary: Update Status of Payment Method Token
+      description: This endpoint can be used to update the status of a paymentMethodToken.
+      operationId: updatePaymentMethodTokenStatus
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID as specified in Credit Card - Generate Client Session.
+        - name: clientPaymentTokenReference
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Client Payment Token Unique Reference as specified in Credit Card - Generate Client Session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: The new status to which the paymentMethodToken should be changed
+                  enum:
+                    - Active
+                    - Paused
+                    - Deleted
+            example:
+              status: 'Active'
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  traceId:
+                    type: string
+                    description: Unique id for logging
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        errorCode:
+                          type: string
+                          description: Monoova error code
+                        errorMessage:
+                          type: string
+                          description: Description of error
+                        sourceErrorCode:
+                          type: string
+                          description: Reserved - not currently used
+                        sourceErrorMessage:
+                          type: string
+                          description: Reserved - not currently used
+              example:
+                traceId: '660ed149-61db-4644-acd0-5510dc840854'
+
+  # webhooks
+  '/WEBHOOK_TARGET_URL':
+    post:
+      tags:
+        - Webhooks
+      summary: Payment Status Notification
+      description: |
+        <p>When the status of the payment changes, Monoova will send a webhook to notify the customer. Webhook will be triggered for the below statuses:</p>
+        <ul>
+          <li>Failed</li>
+          <li>Declined</li>
+          <li>Settlement Complete</li>
+          <li>Cancelled</li>
+        </ul>
+        <p>Additionally, “interim” webhooks will be triggered when surcharging is in effect for the client, once the payment is authorised for a new client session. This is the point at which the surcharging information becomes available and can be communicated. In this scenario, the payment status could also be one of the following non-final status values:</p>
+        <ul>
+          <li>Pending</li>
+          <li>Authorized</li>
+          <li>Settling</li>
+        </ul>
+        <p>Note that if the payment is made using a previously vaulted payment method, the surcharge is already known at new payment creation, so there is no additional interim webhook generated.</p>
+        </br>
+        <p>This webhook can be subscribed using APIs provided in <a href='/payTo#tag/Notification-Management'>Notification Management</a>.</p>
+        </br>
+        <p>Event name - <b>CreditCardPaymentNotification</b></p>
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'Bearer <TOKEN>'
+          description: The securityToken from the subscription.
+        - name: Verification-Signature
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'e+AFAj2W69rAwbsGn+rSSnFm2ISEblo0MXnx9Qtoh2k5mst1cEEpcrVSzGLjzOPlEL2Ea/iYLbFGzDdxVRTcNLINOhsXM/smimNjBt8sq30FbvSNMjlfDnrz6FOIkl3E3cu9B+M4OVL8HafPohb67IRNDNyCnCvBM10qHrioiak='
+          description: |
+            This is a base64 encoded cryptographic signature that should be used<br/>
+            to verify both the integrity of the message as well as the source (Monoova).<br/>
+            The signature's hashing method is SHA256 and the public key can be retrieved from
+            <a href="/payments#operation/PublicCertificatePublicKey"> /public/v1/certificate/public-key</a>.
+      operationId: PaymentStatusNotification
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPaymentStatusResponseDto'
+            example:
+              {
+                'eventId': '9E151397-BCA4-4700-8718-3907368780F5',
+                'sourceEventName': 'CreditCardTransactionUpdated',
+                'eventTimestamp': '2023-04-18T05:34:22.3447159Z',
+                'paymentDetails':
+                  [
+                    {
+                      'transactionId': '123456',
+                      'settlementDateTime': '2023-04-19T05:34:14.5046065Z',
+                      'settlementBatchId': 'batchId',
+                      'sessionCreationDateTime': '2023-04-18T05:34:14.5045854Z',
+                      'clientTransactionUniqueReference': 'clientPaymentId1',
+                      'transactionInitiationDateTime': '2023-04-18T05:35:14.5045854Z',
+                      'amount': '100.00',
+                      'currencyCode': 'AUD',
+                      'surchargeAmount': { 'currencyAmount': '1.00' },
+                      'authenticationChallengeIssued': true,
+                      'authenticationResponseCode': 'AUTH_SUCCESS',
+                      'preAuthorizationFraudResult': 'THREE_DS',
+                      'postAuthorizationFraudResult': 'ACCEPT',
+                      'status': 'Settlement Complete'
+                    },
+                    {
+                      'transactionId': '123456',
+                      'settlementDateTime': '2023-04-19T05:34:14.504628Z',
+                      'settlementBatchId': 'batchId',
+                      'sessionCreationDateTime': '2023-04-18T05:34:14.5046278Z',
+                      'clientTransactionUniqueReference': 'clientPaymentId2',
+                      'transactionInitiationDateTime': '2023-04-18T05:35:14.5046278Z',
+                      'amount': '100.00',
+                      'currencyCode': 'AUD',
+                      'surchargeAmount': { 'currencyAmount': '1.50' },
+                      'authenticationChallengeIssued': true,
+                      'authenticationResponseCode': 'AUTH_SUCCESS',
+                      'preAuthorizationFraudResult': 'THREE_DS',
+                      'postAuthorizationFraudResult': 'ACCEPT',
+                      'status': 'Settlement Complete'
+                    }
+                  ],
+                'authenticationDetails':
+                  { 'responseCode': 'AUTH_SUCCESS', 'challengeIssued': true },
+                'riskDetails':
+                  { 'preAuthorizationResult': 'FAILED', 'postAuthorizationResult': 'ACCEPT' }
+              }
+      responses:
+        '200':
+          description: Any Response
+
+  '/WEBHOOK_REFUND_STATUS_URL':
+    post:
+      tags:
+        - Webhooks
+      summary: Refund Status Notification
+      description:
+        <p> When the status of the refund changes, Monoova will send a webhook to notify the customer.  Webhook will be triggered for the below status
+        </p>
+        <ul>
+        <li>Failed</li>
+        <li>Declined</li>
+        <li>Settlement Complete</li>
+
+        </ul>
+        </br>
+        These webhook can be subscribed using API's provided in <a href='/payTo#tag/Notification-Management'>Notification Management</a>.
+        </br>
+        Event name - <b>CreditCardRefundNotification</b>
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'Bearer <TOKEN>'
+          description: The securityToken from the subscription.
+        - name: Verification-Signature
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'e+AFAj2W69rAwbsGn+rSSnFm2ISEblo0MXnx9Qtoh2k5mst1cEEpcrVSzGL
+            jzOPlEL2Ea/iYLbFGzDdxVRTcNLINOhsXM/smimNjBt8sq30FbvSNMjlfDn
+            rZ6FOIkl3E3cu9B+M4OVL8HafPohb67IRNDNyCnCvBM10qHrioiak='
+          description: This is a base64 encoded cryptographic signature that should be used<br/>
+            to verify both the integrity of the message as well as the source (Monoova). <br/>
+            The signature's hashing method is SHA256 and the public key can be retrieved from
+            <a href="/payments#operation/PublicCertificatePublicKey"> /public/v1/certificate/public-key </a>.
+      operationId: RefundStatusNotification
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRefundStatusResponseDto'
+            example:
+              {
+                eventId: '9E151397-BCA4-4700-8718-3907368780F5',
+                sourceEventName: 'CreditCardRefundUpdated',
+                eventTimestamp: '2023-04-18T05:34:22.3447159Z',
+                refundDetails:
+                  [
+                    {
+                      transactionId: '123456',
+                      settlementDateTime: '2023-04-19T05:34:14.5046065Z',
+                      settlementBatchId: 'batchId',
+                      sessionCreationDateTime: '2023-04-18T05:34:14.5045854Z',
+                      clientTransactionUniqueReference: 'clientPaymentId1',
+                      transactionInitiationDateTime: '2023-04-18T05:35:14.5045854Z',
+                      amount: '100.00',
+                      currencyCode: 'AUD',
+                      status: 'Settlement Complete'
+                    },
+                    {
+                      transactionId: '123456',
+                      settlementDateTime: '2023-04-19T05:34:14.504628Z',
+                      settlementBatchId: 'batchId',
+                      sessionCreationDateTime: '2023-04-18T05:34:14.5046278Z',
+                      clientTransactionUniqueReference: 'clientPaymentId2',
+                      transactionInitiationDateTime: '2023-04-18T05:35:14.5046278Z',
+                      amount: '100.00',
+                      currencyCode: 'AUD',
+                      status: 'Settlement Complete'
+                    }
+                  ]
+              }
+      responses:
+        '200':
+          description: Any Response
+
+  '/WEBHOOK_ASYNC_REQUEST_URL':
+    post:
+      tags:
+        - Webhooks
+      summary: Asynchronous Request Notification
+      description:
+        This webhook can be subscribed using API's provided in <a href='/payTo#tag/Notification-Management'>Notification Management</a>.
+        </br>
+        Event name - <b>AsyncJobResultNotification</b>
+      operationId: AsyncRequestNotification
+      security: []
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'Bearer <TOKEN>'
+          description: The securityToken from the subscription.
+        - name: Verification-Signature
+          in: header
+          required: false
+          schema:
+            type: string
+          example: 'e+AFAj2W69rAwbsGn+rSSnFm2ISEblo0MXnx9Qtoh2k5mst1cEEpcrVSzGL
+            jzOPlEL2Ea/iYLbFGzDdxVRTcNLINOhsXM/smimNjBt8sq30FbvSNMjlfDn
+            rZ6FOIkl3E3cu9B+M4OVL8HafPohb67IRNDNyCnCvBM10qHrioiak='
+          description: This is a base64 encoded cryptographic signature that should be used<br/>
+            to verify both the integrity of the message as well as the source (Monoova). <br/>
+            The signature's hashing method is SHA256 and the public key can be retrieved from
+            <a href="/payments#operation/PublicCertificatePublicKey"> /public/v1/certificate/public-key </a>.
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookAsyncRequestResponseDto'
+            example:
+              {
+                eventId: '9E151397-BCA4-4700-8718-3907368780F5',
+                sourceEventName: 'AsyncJobCompleted',
+                eventTimestamp: '2023-04-18T05:34:22.3447159Z',
+                uniqueRequestId: 'b78e1829-dd2e-4119-a678-af8abccf9129',
+                status: 'Failed',
+                entityType: 'CreditCardPayment',
+                actionType: 'Create',
+                location: 'https://api.monoova.com/au/payto/pam/MONPAG2323232',
+                errorCode: 'PAM_UNEXPECTED_ERROR',
+                errorMessage: 'Internal server error. Please contact Monoova support.'
+              }
+      responses:
+        '200':
+          description: Any Response
+
+  # Notification Management
+  '/au/core/notification-v1/Subscription':
+    post:
+      tags:
+        - Notification Management
+      summary: Create a subscription
+      operationId: post-subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionDetailUpdateRequest'
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUpdateResponse'
+              example:
+                traceId: null
+                subscriptionId: 76852ceb-f3d2-40e6-b1e3-f97e20ce0c1b
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+
+  '/au/core/notification-v1/Subscription/{subscriptionId}':
+    get:
+      tags:
+        - Notification Management
+      summary: GET Subscription
+      description: Gets the subscription by Id
+      operationId: get-subscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Monoova generated Guid to uniquely identify the subscription. </br> This is required when updating a subscription, if not provided then we assume we are trying to create a new subscription.</br>Is a valid Guid when not blank.
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionListResponse'
+              example:
+                traceId: null
+                subscriptionDetails:
+                  - subscriptionName: CardTest
+                    subscriptionId: 734d8a9d-7ac6-44a7-9e88-867fb59f54e9
+                    eventName: PaymentAgreementNotification
+                    webHookDetail:
+                      callBackUrl: http://demo7446995.mockable.io/pagnotification
+                    isActive: true
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+    delete:
+      tags:
+        - Notification Management
+      summary: 'DELETE a subscription'
+      operationId: delete-subscription-id
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Monoova generated Guid to uniquely identify the subscription. </br> This is required when updating a subscription, if not provided then we assume we are trying to create a new subscription.</br>Is a valid Guid when not blank.
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDeleteResponse'
+              example:
+                traceId: null
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+    put:
+      tags:
+        - Notification Management
+      summary: Update a subscription
+      operationId: put-subscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Monoova generated Guid to uniquely identify the subscription. </br> This is required when updating a subscription, if not provided then we assume we are trying to create a new subscription.</br>Is a valid Guid when not blank.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionDetailUpdateRequest'
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUpdateResponse'
+              example:
+                traceId: null
+                subscriptionId: 76852ceb-f3d2-40e6-b1e3-f97e20ce0c1b
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+
+  '/au/core/notification-v1/Notification':
+    get:
+      tags:
+        - Notification Management
+      summary: GET Webhooks
+      operationId: get-webhookschedule
+      parameters:
+        - name: start
+          in: query
+          description: Format - date-time (as date-time in RFC3339).
+          schema:
+            type: string
+            format: date-time
+        - name: pageSize
+          in: query
+          description: Format - int32.
+          schema:
+            type: integer
+            format: int32
+        - name: pageNumber
+          in: query
+          description: Format - int32.
+          schema:
+            type: integer
+            format: int32
+        - name: end
+          in: query
+          description: Format - date-time (as date-time in RFC3339).
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebHookListResponse'
+              example:
+                traceId: d5e0b5ee-2aff-4ac7-a638-893b664183a3
+                notifications:
+                  - eventId: 2a37987a-0486-4c6f-9267-9ff44eb168c6
+                    sourceEventName: PaymentAgreement_Updated
+                    url: https://f89be4be-781a-47cd-8048-8ba3f5438d56.mock.pstmn.io/PaymentAgreementNotificaion
+                    eventTimestamp: 2022-08-29T03:11:01.471Z
+                    executionCompleteDateTimeUtc: 2022-08-29T03:11:03.365Z
+                    status: Success
+                    statusDescription: Hello
+                    lastResponseCode: 200
+                    retryCount: 0
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+
+  '/au/core/notification-v1/Notification/resend/{eventId}':
+    post:
+      tags:
+        - Notification Management
+      summary: 'Request a resend'
+      operationId: post-webhookschedule-resend-eventid
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebHookResendResponse'
+              example:
+                traceId: null
+        '400':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '403':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '404':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '500':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '502':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+        '504':
+          description: Error
+          content:
+            application/json:
+              example:
+                {
+                  'traceId': 'f1a7fbd7-ca39-4b98-b247-f4e0e004f152',
+                  'errors': [{ 'errorCode': 'string', 'errorMessage': 'string' }]
+                }
+
+  # Authentication - CC
+  '/au/security/oauth-v1/Token':
+    post:
+      summary: Token
+      tags:
+        - Generate a Bearer Token
+      description: </br><p>
+        Authentication for credit card API will be handled in Auth0 and access to APIs will be based on the Bearer token. Customers should register in Portal to use the credit card service. Only the admin of the group will be able to register an account for APIM access. Customers will be notified once they have been activated for credit cards. Once approved, the Bearer token can be retrieved using token API by passing the username as mAccount and the latest API Key as password in the header. The access token expires after 3600 seconds (60 minutes), after which the customer’s application should generate a new access token. </p></br>
+        This API endpoint uses BASIC Authentication.
+        </br> <style type="text/css">
+        .tb { table-layout:auto; width:200px;!important }
+        .td { overflow:hidden; white-space:nowrap; text-overflow:ellipsis!important}
+        </style>
+        <table class="tb">
+
+        <tr>
+        <td class="td">
+        username <br/>
+        </td>
+        <td class="td">
+        Your mAccount number that can be obtained from portal <br/>
+        </td>
+        </tr>
+        <tr>
+        <td class="td">
+
+        password <br/>
+        </td>
+        <td class="td">
+        Your API key that can be obtained from portal <br/>
+        </td>
+        </tr>
+        </table>
+        </br>
+        </br>
+        <b>Please note that token can be of variable length. Please do not add any validation or restriction on token length. This token can be used to access all credit card APIs.</b>
+
+      operationId: oauth-v1/token
+      security:
+        - BasicAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                example: { 'token': ' ' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    RefundRequest:
+      type: object
+      required:
+        - clientParentTransactionUniqueReference
+        - clientTransactionUniqueReference
+      properties:
+        clientParentTransactionUniqueReference:
+          description: The 'clientTransactionUniqueReference' ID of original payment
+          type: string
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}'
+        clientTransactionUniqueReference:
+          description: Client unique reference for the refund transaction. <br/>
+            Id should be unique across Payment and Refund.
+          type: string
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}'
+        refundAmount:
+          description: amount to be refunded<br/>If omitted or zero, the whole remaining amount will be refunded. The amount cannot exceed original payment amount.
+          type: number
+          format: float
+          minimum: 0
+        refundReason:
+          description: reason for the refund
+          type: string
+          maxLength: 40
+
+      additionalProperties: false
+
+    PaymentMethodTokenDetailsResponse:
+      type: object
+      properties:
+        traceId:
+          type: string
+          description: Unique id for logging
+          example: '68a885bc-1f6b-4571-9ed6-f0e50e082103'
+        paymentMethodTokenDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodTokenDetail'
+    PaymentMethodTokenDetail:
+      type: object
+      properties:
+        clientPaymentTokenUniqueReference:
+          type: string
+          description: Provided when the payment token was created
+          example: 'unique-token-reference-12345'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        creationDateTime:
+          type: string
+          format: date-time
+          description: Formatted as ISO 8601 dateTime with UTC timezone
+          example: '2024-02-22T12:34:56.789Z'
+        lastTransactionDate:
+          type: string
+          format: date-time
+          description: Formatted as ISO 8601 dateTime with UTC timezone
+          example: '2024-02-21T10:20:30.456Z'
+        expirationMonth:
+          type: string
+          description: Expiry month as on the card
+          example: '12'
+        expirationYear:
+          type: string
+          description: Expiry year as on the card
+          example: '2026'
+        status:
+          type: string
+          description: Token status (e.g., Active, Paused, Card Expired)
+          example: 'Active'
+        last4Digits:
+          type: string
+          description: Last 4 digits of card number
+          example: '1111'
+        first6Digits:
+          type: string
+          description: First 6 digits of card number
+          example: '407220'
+        cardholderName:
+          type: string
+          description: Card holder name as on the card
+          example: 'Jane Doe'
+        cardType:
+          type: string
+          description: Card type (aka Network)
+          example: 'VISA'
+        issuerCountryCode:
+          type: string
+          description: Country code of card issuer
+          example: 'AU'
+        issuerName:
+          type: string
+          description: Card issuing institution
+          example: 'ANZ'
+        paymentMethodTokenHash:
+          type: string
+          description: Unique hash generated from payment method token. Can be used to identify duplicates of the same payment method token
+          example: '900150983cd24fb0d6963f7d28e17f72'
+    Customer:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: Client’s own customerId for their customer, as provided when the payment token was created
+          example: 'cust123456789'
+        billingAddress:
+          $ref: '#/components/schemas/BillingAddress'
+        emailAddress:
+          type: string
+          description: Customer email address
+          example: 'jane.doe@example.com'
+    BillingAddress:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - street
+        - suburb
+        - state
+        - postalCode
+        - countryCode
+      properties:
+        firstName:
+          type: string
+          description: Customer first name
+          example: 'Jane'
+        lastName:
+          type: string
+          description: Customer last name
+          example: 'Doe'
+        street:
+          type: array
+          items:
+            type: string
+          description: 1 to 2 lines of street name
+          example:
+            - '123 Main St'
+            - 'Unit 4'
+        suburb:
+          type: string
+          description: Suburb
+          example: 'Springfield'
+        state:
+          type: string
+          description: State code
+          example: 'QLD'
+        postalCode:
+          type: string
+          description: Postal code
+          example: '4550'
+        countryCode:
+          type: string
+          description: ISO2 country code
+          example: 'AU'
+
+    RefundResponse:
+      type: object
+      properties:
+        traceId:
+          description: unique end to end trace id for diagnostic
+          type: string
+        uniqueRequestId:
+          description: the unique Id generated for this async request as needed for the status polling
+          type: string
+      additionalProperties: false
+
+    AsyncStatusResponse200:
+      type: object
+      properties:
+        traceId:
+          description: unique end to end trace id for diagnostic
+          type: string
+          example: 'be393fae-52c2-4c9e-a262-4974de6da750'
+        uniqueRequestId:
+          description: the unique Id for this async job as returned in the originating request
+          type: string
+          example: '4834dba5-27b0-465c-aea7-aa530315c68c'
+        clientTransactionUniqueReference:
+          description: unique refund Id provided by the client
+          type: string
+          example: 'MONCC1673935776'
+        status:
+          description: one of the below - <br/>
+            Accepted <br/>
+            Processing <br/>
+            Completed <br/>
+            Failed <br/>
+            Expired
+          type: string
+          example: 'Processing'
+      additionalProperties: false
+    AsyncStatusResponse201:
+      type: object
+      properties:
+        traceId:
+          description: unique end to end trace id for diagnostic
+          type: string
+          example: 'c0905f60-80b7-4a6a-abe3-0207b3e19b8e'
+        uniqueRequestId:
+          description: the unique Id for this async job as returned in the originating request
+          type: string
+          example: '595a3202-e9aa-406e-a2a3-5efb6ca8b72a'
+        clientTransactionUniqueReference:
+          description: unique refund Id provided by the client
+          type: string
+          example: 'MONCC1673930138'
+        status:
+          description: one of the below - <br/>
+            Accepted <br/>
+            Processing <br/>
+            Completed <br/>
+            Failed <br/>
+            Expired
+          type: string
+          example: 'Completed'
+      additionalProperties: false
+    CreateClientSessionDto:
+      type: object
+      required:
+        - clientTransactionUniqueReference
+        - customer
+        - paymentDetails
+        - amount
+      properties:
+        clientTransactionUniqueReference:
+          type: string
+          description:
+            Id will be used to uniquely identify each payment request made by our customer. <br/>
+            Id should be unique across Payment and Refund.
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}$'
+        customer:
+          $ref: '#/components/schemas/CustomerDetailsDto'
+        paymentDetails:
+          $ref: '#/components/schemas/PaymentDetailsDto'
+        amount:
+          type: object
+          properties:
+            currencyAmount:
+              description: Payment amount. Must be zero when capturePayment is false, otherwise must be greater than zero.
+              type: number
+              format: decimal
+              maximum: 20000000.00
+              minimum: 0.00
+              multipleOf: 0.01
+      additionalProperties: false
+    CreditCardTransactionDetailsResponse:
+      type: object
+      required:
+        - clientTransactionUniqueReference
+        - paymentDetails
+        - amount
+      properties:
+        clientTransactionUniqueReference:
+          type: string
+          description: Id will be used to uniquely identify each payment request made by our customer.
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}$'
+        transactionId:
+          type: string
+          description: Monoova transaction Id. Only available after settlement.
+        customerId:
+          type: string
+          description: Client’s customer Id as provided by the client when the session was created.
+        creationDateTime:
+          type: string
+          format: date-time
+          description: For Payments, time the session for the Transaction was created and token allocated.<br>For Refunds, time the Refund request was accepted.
+        transactionInitiationDateTime:
+          type: string
+          format: date-time
+          description: Time the payment processor initiated the transaction as ISO 8601 dateTime with UTC timezone.
+        settlementDateTime:
+          type: string
+          format: date-time
+          description: Time of final settlement by Monoova of the transaction as ISO 8601 dateTime with UTC timezone.
+        settlementBatchId:
+          type: string
+          description: Batch Id of settlement file for the payment.
+        amount:
+          type: object
+          properties:
+            currencyAmount:
+              description: Payment amount
+              type: number
+              format: decimal
+              maximum: 20000000.00
+        surchargeAmount:
+          type: object
+          properties:
+            currencyAmount:
+              description: Surcharge amount applied for the payment.
+              type: number
+              format: decimal
+              maximum: 20000000.00
+              nullable: true
+        paymentDetails:
+          $ref: '#/components/schemas/PaymentDetailsDto'
+        transactionType:
+          type: string
+          description: Payment<br>Refund<br>Chargeback.
+        status:
+          type: string
+          description: Payment transaction status. Must be one of<br>Initiated<br>Pending<br>Failed<br>Authorized<br>Pending Settlement<br>Settlement In Progress<br>Declined<br>Settlement Complete<br>Refund In Progress<br>Partially Refunded<br>Fully Refunded<br>Cancelled.
+        statusReasonCode:
+          type: string
+          description: Reason code may be provided by the payment processor if payment is declined.
+        statusReasonDescription:
+          type: string
+          description: Reason description may be provided by the payment processor if payment is declined.
+        refundStatus:
+          type: string
+          description: Only defined for payments with a refund requested. May be one of <br/>Refund Initiated<br/>Refund Approved<br/>Refund In Progress<br/>Partially Refunded<br/>Fully Refunded<br/>Refund Declined
+        clientParentTransactionUniqueReference:
+          type: string
+          description: Present if the transaction is a refund. The clientTransactionUniqueReference of the parent Payment transaction that this transaction is refunding.
+        refundTransactions:
+          $ref: '#/components/schemas/RefundTransactionsDto'
+        authenticationDetails:
+          $ref: '#/components/schemas/AuthenticationDetailsDto'
+        riskDetails:
+          $ref: '#/components/schemas/RiskDetailsDto'
+        cardDetails:
+          type: object
+          properties:
+            expirationMonth:
+              type: string
+              description: Expiration month of the card.
+            expirationYear:
+              type: string
+              description: Expiration year of the card.
+            last4Digits:
+              type: string
+              description: Last 4 digits of the card number.
+            first6Digits:
+              type: string
+              description: First 6 digits of the card number.
+            cardholderName:
+              type: string
+              description: Cardholder's full name.
+            cardType:
+              type: string
+              description: Card type (e.g., VISA, MasterCard).
+            issuerCountryCode:
+              type: string
+              description: Issuer's country code.
+            issuerName:
+              type: string
+              description: Issuer's name (e.g., ANZ).
+      additionalProperties: false
+    GenerateClientSessionResponse:
+      type: object
+      properties:
+        traceId:
+          type: string
+          example: 36ed60f5-dcf1-4947-a31e-8ec93d06ca4b
+        clientTransactionUniqueReference:
+          type: string
+          example: DCCCC5DE-CC48-4942-A419-F1B84EC122C4
+        clientTokenExpirationDate:
+          type: string
+          description: The date and time that the session expires.
+          example: 2023-02-22T02:49:19.5259180Z
+          nullable: true
+        clientToken:
+          type: string
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6ImNsaWVudC10b2tlbi1zaWduaW5nLWtleSJ9.eyJleHAiOjE2NzcwMzQxNTksImFjY2Vzc1Rva2VuIjoiMDIzZGE2ZWQtMDE2MS00OThiLWI0NDgtNDBjOTc0NDk2ZWEyIiwiYW5hbHl0aWNzVXJsIjoiaHR0cHM6Ly9hbmFseXRpY3MuYXBpLnNhbmRib3guY29yZS5wcmltZXIuaW8vbWl4cGFuZWwiLCJhbmFseXRpY3NVcmxWMiI6Imh0dHBzOi8vYW5hbHl0aWNzLnNhbmRib3guZGF0YS5wcmltZXIuaW8vY2hlY2tvdXQvdHJhY2siLCJpbnRlbnQiOiJDSEVDS09VVCIsImNvbmZpZ3VyYXRpb25VcmwiOiJodHRwczovL2FwaS5zYW5kYm94LnByaW1lci5pby9jbGllbnQtc2RrL2NvbmZpZ3VyYXRpb24iLCJjb3JlVXJsIjoiaHR0cHM6Ly9hcGkuc2FuZGJveC5wcmltZXIuaW8iLCJwY2lVcmwiOiJodHRwczovL3Nkay5hcGkuc2FuZGJveC5wcmltZXIuaW8iLCJlbnYiOiJTQU5EQk9YIiwicGF5bWVudEZsb3ciOiJERUZBVUxUIn0.22vMTZEf66pOelIUpsx_98bYD5cvQWkfnsuhnPE8bII
+      additionalProperties: false
+
+    CustomerDetailsDto:
+      type: object
+      required:
+        - emailAddress
+      properties:
+        billingAddress:
+          type: object
+          nullable: true
+          description: The customers billing address. If any part of the billing address is provided, all of the following fields must be provided
+          properties:
+            firstName:
+              type: string
+              maxLength: 60
+              nullable: true
+              description: First name of the biller
+            lastName:
+              type: string
+              maxLength: 60
+              nullable: true
+              description: Last name of the biller
+            street:
+              #oneOf:
+              #  - type: string
+              #    maxLength: 37
+              #    description: Street length is limited When payment method is AMEX.
+              type: string
+              maxLength: 60
+              description: Street of the biller
+            suburb:
+              type: string
+              maxLength: 14
+              description: Suburb of the biller
+            state:
+              type: string
+              maxLength: 3
+              description: State of the biller
+            postalCode:
+              type: string
+              maxLength: 14
+              description: Postcode of the biller
+            countryCode:
+              type: string
+              maxLength: 2
+              pattern: ^[A-Z]{2}
+              description: 2 character ISO country code
+        emailAddress:
+          description: email address of the biller. This is required for 3DS
+          maxLength: 40
+          pattern: ^[a-zA-Z0-9.!#$%&’+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)
+          type: string
+        customerId:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,40}$
+          description: |
+            Value to uniquely identify a customer within a particular client/mAccount.
+        firstName:
+          type: string
+          maxLength: 60
+          nullable: true
+          pattern: ^[^#<>$%^_=[\\]\\\\{}|;~`]+$
+          description: |
+            Customer first name. Mandatory if billingAddress is not provided
+        lastName:
+          type: string
+          maxLength: 60
+          nullable: true
+          pattern: ^[^#<>$%^_=[\\]\\\\{}|;~`]+$
+          description: |
+            Customer last name. Mandatory if billingAddress is not provided
+      additionalProperties: false
+
+    CreatePaymentRequest:
+      type: object
+      required:
+        - clientTransactionUniqueReference
+        - customer
+        - paymentDetails
+        - amount
+      properties:
+        clientTransactionUniqueReference:
+          type: string
+          description: This id will be used to uniquely identify each payment request made by our customer
+          pattern: '^[a-zA-Z0-9_-]{1,40}$'
+        customer:
+          type: object
+          required:
+            - customerId
+          properties:
+            customerId:
+              type: string
+              description: Value to uniquely identify a customer
+              pattern: '^[a-zA-Z0-9_-]{1,16}$'
+            billingAddress:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - street
+                - suburb
+                - state
+                - postalCode
+                - countryCode
+              properties:
+                firstName:
+                  type: string
+                  maxLength: 60
+                lastName:
+                  type: string
+                  maxLength: 60
+                street:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 60
+                  minItems: 1
+                  maxItems: 2
+                suburb:
+                  type: string
+                  maxLength: 14
+                state:
+                  type: string
+                  maxLength: 3
+                postalCode:
+                  type: string
+                  maxLength: 14
+                countryCode:
+                  type: string
+                  pattern: '^[A-Z]{2}$'
+            emailAddress:
+              type: string
+              format: email
+              maxLength: 40
+        paymentDetails:
+          type: object
+          required:
+            - clientPaymentTokenUniqueReference
+            - description
+          properties:
+            clientPaymentTokenUniqueReference:
+              type: string
+              pattern: '^[a-zA-Z0-9_-]{1,40}$'
+            description:
+              type: string
+              maxLength: 40
+        amount:
+          type: object
+          required:
+            - currencyAmount
+          properties:
+            currencyAmount:
+              type: number
+              format: decimal
+              maximum: 20000000.00
+    PaymentResponse:
+      type: object
+      required:
+        - traceId
+        - clientTransactionUniqueReference
+        - clientPaymentTokenUniqueReference
+        - status
+      properties:
+        traceId:
+          type: string
+          description: Unique identifier for logging
+        clientTransactionUniqueReference:
+          type: string
+          description: Unique identifier for each payment request
+        clientPaymentTokenUniqueReference:
+          type: string
+          description: Token against which Payment should be created
+        status:
+          type: string
+          description: Current status of the transaction
+
+    PaymentDetailsDto:
+      type: object
+      properties:
+        cardType:
+          type: string
+          description: Card Type. Must be one of Visa, Mastercard. Case insensitive.
+        description:
+          type: string
+          description: Payment description. This will be saved in Monoova's system but will not be passed to the issuer.
+          maxLength: 40
+        saveOnSuccess:
+          type: boolean
+          default: false
+          description: System will save the payment method on successful payment. Optional, defaults to false.
+        allowCredit:
+          type: boolean
+          default: true
+          description: If set to true, credit card will be allowed. If set to false only Debit cards and prepaid cards will be allowed. Optional, defaults to true.
+        clientPaymentTokenUniqueReference:
+          type: string
+          description: The unique id the client will use to refer to the persisted token for future payments. Mandatory if saveOnSuccess is true, otherwise prohibited. The value must be unique for this combination of client (mAccount) and customerId. Lowercase will be converted to uppercase.
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}$'
+        applySurcharge:
+          type: boolean
+          default: false
+          description: Add a calculated fee to the total amount for this transaction. Optional, defaults to false. Only allowed to be true if the surcharging is enabled in the account configuration.
+        capturePayment:
+          type: boolean
+          description: Set to false (with an appropriate amount) if payment only needs to be authorized. Set to true or ignore this property if payment needs to be authorized and captured.
+          default: true
+          nullable: true
+      additionalProperties: false
+
+    RefundTransactionsDto:
+      properties:
+        clientTransactionUniqueReference:
+          type: string
+          description: as provided by the client when the refund was requested.
+          maxLength: 40
+          pattern: '^[a-zA-Z0-9_-]{1,40}$'
+
+        transactionId:
+          type: string
+          description: Monoova transaction Id for the refund.  Only available after settlement.
+
+        amount:
+          type: object
+          description: amount of the refund as <major_units>.<minor_units>
+          properties:
+            currencyAmount:
+              description: payment amount
+              type: number
+              format: decimal
+              maximum: 20000000.00
+
+        transactionType:
+          type: string
+          description: Payment<br/>Refund <br/> Chargeback
+        status:
+          type: string
+          description: refund transaction status.  Must be one of <br/>
+            <br/>Initiated<br/>Pending<br/>Failed<br/>Authorized<br/>Pending Settlement<br/>Settlement In Progress<br/>Declined<br/>Settlement Complete<br/></br>Cancelled
+        statusReasonCode:
+          type: string
+          description: reason code may be provided by the payment processor if refund is declined
+        statusReasonDescription:
+          type: string
+          description: reason code may be provided by the payment processor if refund is declined
+        transactionInitiationDateTime:
+          type: string
+          description: Time the payment processor initiated the refund as ISO 8601 dateTime with UTC timezone
+        settlementDateTime:
+          type: string
+          description: Time of final settlement by Monoova of the refund as ISO 8601 dateTime with UTC timezone
+        settlementBatchId:
+          type: string
+          description: Batch Id of settlement file for the payment
+      required:
+        - clientTransactionUniqueReference
+      additionalProperties: false
+    WebhookPaymentStatusResponseDto:
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: eventId must be a string not an integer. It should allow at least 40 characters including alphanumerics and hyphen “-”
+        sourceEventName:
+          type: string
+          enum:
+            - CreditCardTransactionUpdated
+        eventTimestamp:
+          type: string
+          format: date-time
+          description: ISO Date Time in UTC
+        paymentDetails:
+          $ref: '#/components/schemas/PaymentDetailsResponseDto'
+        authenticationDetails:
+          $ref: '#/components/schemas/AuthenticationDetailsDto'
+        riskDetails:
+          $ref: '#/components/schemas/RiskDetailsDto'
+      additionalProperties: false
+
+    WebhookRefundStatusResponseDto:
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: eventId must be a string not an integer. It should allow at least 40 characters including alphanumerics and hyphen “-”
+        sourceEventName:
+          type: string
+          enum:
+            - CreditCardRefundUpdated
+        eventTimestamp:
+          type: string
+          format: date-time
+          description: ISO Date Time in UTC
+        refundDetails:
+          $ref: '#/components/schemas/RefundDetailsResponseDto'
+      additionalProperties: false
+
+    WebhookAsyncRequestResponseDto:
+      type: object
+      required:
+        - uniqueRequestId
+      properties:
+        eventId:
+          type: string
+          description: eventId must be a string not an integer. It should allow at least 40 characters including alphanumerics and hyphen “-”
+        sourceEventName:
+          type: string
+          enum:
+            - CreditCardRefundUpdated
+        eventTimestamp:
+          type: string
+          format: date-time
+          description: ISO Date Time in UTC
+        uniqueRequestId:
+          type: string
+          pattern: '[a-z0-9-]{36}'
+          description: The async request Id returned by the original async API call
+        status:
+          type: string
+          description: One of <br/> Completed - successful completion <br/> Failed - error encountered <br/> Expired - request could not be completed within a reasonable time (currently 48 hours)
+        location:
+          type: string
+          format: uri
+          description: URL Location of the updated resource <br/> Only if status = Completed
+        errorCode:
+          type: string
+          description: Only if status = Failed
+        errorMessage:
+          type: string
+          description: Only if status = Failed
+        entityType:
+          type: string
+          enum:
+            - PaymentAgreement
+            - PaymentInstruction
+            - CreditCardPayment
+            - CreditCardRefund
+          description: The type of the entity involved in the transaction.
+        actionType:
+          type: string
+          enum:
+            - Create
+            - Amend
+            - Cancel
+            - RecallAction
+            - AmendStatus
+          description: >
+            The type of action being performed. 
+            - 'Create' is valid for PaymentAgreement, PaymentInstruction, CreditCardRefund.
+            - 'Amend' is valid for PaymentAgreement.
+            - 'Cancel' is valid for CreditCardPayment (Note: Cancellations are currently disabled).
+            - 'RecallAction' and 'AmendStatus' are valid for PaymentAgreement.
+      additionalProperties: false
+    PaymentDetailsResponseDto:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: Payment Engine mAccount Load TransactionId.
+        settlementDateTime:
+          type: string
+          format: date-time
+          description: Payment Engine mAccount Load Transaction Date Time
+        transactionInitiationDateTime:
+          type: string
+          format: date-time
+          description: Time the payment processor initiated the transaction as ISO 8601 dateTime with UTC timezone
+        clientTransactionUniqueReference:
+          type: string
+          description: This will be mapped to the uniqueReference customer sent while requesting for a client session. This will be the same as the uniqueReference for mAccount Load Transaction
+        amount:
+          type: string
+          description: Amount of the payment
+        currencyCode:
+          type: string
+          description: Payment currency code
+        authenticationChallengeIssued:
+          type: boolean
+          description: End customer prompted for 3DS.
+        authenticationResponseCode:
+          type: string
+          description: AUTH_SUCCESS, AUTH_FAILED, or NOT_PERFORMED
+        preAuthorizationFraudResult:
+          type: string
+          description: Possible fraud check outcomes.
+        postAuthorizationFraudResult:
+          type: string
+          description: Possible fraud check outcomes.
+        sessionCreationDateTime:
+          type: string
+          format: date-time
+          description: Time when the customer made a request to create the session
+        status:
+          type: string
+          description: Possible values can be Failed, Declined, Cancelled, and Settlement Complete
+        statusReasonCode:
+          type: string
+          description: Reason code provided by the payment processor if payment is declined
+        statusReasonDescription:
+          type: string
+          description: Reason description provided by the payment processor if payment is declined
+        settlementBatchId:
+          type: string
+          description: UniqueId to determine the batch that settled this transaction
+        saveOnSuccess:
+          type: boolean
+          description: System will save the payment method on successful payment. Optional, defaults to false.
+        clientPaymentTokenUniqueReference:
+          type: string
+          description: Client Payment Token Unique Reference
+        customerId:
+          type: string
+          description: Client's own customerId for their customer, as provided when the payment token was created.
+      additionalProperties: false
+
+    AuthenticationDetailsDto:
+      type: object
+      properties:
+        responseCode:
+          type: string
+          description: AUTH_SUCCESS <br/> AUTH_FAILED
+        challengeIssued:
+          type: boolean
+          description: End customer prompted for 3DS.
+      additionalProperties: false
+
+    RiskDetailsDto:
+      type: object
+      properties:
+        preAuthorizationResult:
+          type: string
+          description: Possible fraud check outcomes.
+        postAuthorizationResult:
+          type: string
+          description: Possible fraud check outcomes.
+      additionalProperties: false
+
+    RefundDetailsResponseDto:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: Payment Engine mAccount debit TransactionId.
+        settlementDateTime:
+          type: string
+          format: date-time
+          description: Payment Engine mAccount debit Transaction Date Time
+        transactionInitiationDateTime:
+          type: string
+          format: date-time
+        clientTransactionUniqueReference:
+          type: string
+          description: This will be mapped to the uniqueReference customer sent while initiating the refund.
+        amount:
+          type: string
+          description: Amount of the refund
+        surchargeAmount:
+          type: string
+          description: Surcharge applied for the transaction
+        currencyCode:
+          type: string
+          description: Payment currency code
+        sessionCreationDateTime:
+          type: string
+          format: date-time
+          description: Time when customer made request to create session
+        status:
+          type: string
+          description: Possible values can be Failed, Declined, or Settlement Complete
+        statusReasonCode:
+          type: string
+          description: Reason code provided by the payment processor if the refund fails or is declined
+        statusReasonDescription:
+          type: string
+          description: Reason description provided by the payment processor if the refund fails or is declined
+        settlementBatchId:
+          type: string
+          description: Unique ID to determine the batch that settled this transaction
+        saveOnSuccess:
+          type: boolean
+          description: System will save the refund method on successful processing. Optional, defaults to false.
+      additionalProperties: false
+
+    WebHookResendResponse:
+      type: object
+      required:
+        - status
+        - statusDescription
+      properties:
+        status:
+          type: string
+          nullable: true
+        statusDescription:
+          type: string
+          nullable: true
+      additionalProperties: false
+    WebHookListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        statusDescription:
+          type: string
+          nullable: true
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebHookResponse'
+          nullable: true
+      additionalProperties: false
+    WebHookResponse:
+      type: object
+      properties:
+        eventId:
+          type: string
+          nullable: true
+        sourceEventName:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+        eventTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        executionCompleteDateTimeUtc:
+          type: string
+          format: date-time
+          nullable: true
+        payload:
+          type: string
+          nullable: true
+        method:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        statusDescription:
+          type: string
+          nullable: true
+        lastResponseCode:
+          type: integer
+          format: int32
+          nullable: true
+        retryCount:
+          type: integer
+          format: int32
+          nullable: true
+        clientRequestedResend:
+          type: boolean
+      additionalProperties: false
+    WebHookDetail:
+      type: object
+      properties:
+        callBackUrl:
+          type: string
+          example: 'http://demo7446995.mockable.io/pagnotification'
+          description: URL of your server.
+          nullable: true
+        securityToken:
+          type: string
+          example: Basic 13222276767676
+          description: This token will be sent back with the callback in Authorization header. (Authorization &#58;  [type] [credentials]  (e.x Basic Rjc1234567890jdGMS67890U78...)) When creating the token, both 'type' and 'credentials' are required.
+      required:
+        - callBackUrl
+      additionalProperties: false
+    WebHookDetailGet:
+      type: object
+      properties:
+        callBackUrl:
+          type: string
+          example: 'http://demo7446995.mockable.io/pagnotification'
+          description: URL of your server.
+          nullable: true
+      required:
+        - callBackUrl
+      additionalProperties: false
+    SubscriptionDeleteResponse:
+      type: object
+      properties:
+        traceId:
+          type: string
+          nullable: true
+        errors:
+          type: string
+          nullable: true
+      additionalProperties: false
+    SubscriptionDetailResponse:
+      type: object
+      properties:
+        subscriptionName:
+          type: string
+          nullable: true
+          maxLength: 36
+          description: User-Defined name, to make the purpose or owner clear. </br> Name provided by customers only.
+          pattern: ^[A-Za-z0-9_-]
+        eventName:
+          type: string
+          description: The event we are subscribing to.</br> Must be “PaymentAgreementNotification” - the forwards all payment agreement events to the Webhook URL.
+          nullable: true
+        notificationType:
+          type: string
+          nullable: true
+        webHookDetail:
+          $ref: '#/components/schemas/WebHookDetailGet'
+        isActive:
+          type: boolean
+      required:
+        - subscriptionName
+        - eventName
+        - isActive
+      additionalProperties: false
+    SubscriptionDetailUpdateRequest:
+      type: object
+      properties:
+        subscriptionName:
+          maxLength: 36
+          example: PayToTest
+          description: User-Defined name, to make the purpose or owner clear. </br> Name provided by customers only.
+          pattern: ^[A-Za-z0-9_-]
+        eventName:
+          type: string
+          description: The event we are subscribing to.</br> Must be “PaymentAgreementNotification” - the forwards all payment agreement events to the Webhook URL.
+          nullable: true
+          example: PaymentAgreementNotification
+        webHookDetail:
+          $ref: '#/components/schemas/WebHookDetail'
+        isActive:
+          type: boolean
+          example: true
+      required:
+        - subscriptionName
+        - eventName
+        - isActive
+      additionalProperties: false
+    SubscriptionListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        statusDescription:
+          type: string
+          nullable: true
+        subscriptionDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionDetailResponse'
+          nullable: true
+      additionalProperties: false
+    SubscriptionUpdateResponse:
+      type: object
+      properties:
+        traceId:
+          type: string
+          nullable: true
+        subscriptionId:
+          type: string
+          nullable: true
+      additionalProperties: false

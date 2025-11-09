@@ -1,0 +1,68 @@
+@startuml
+title 3. Account Verification Flow (Optional)
+
+actor "Admin" as Admin
+participant "Your Backend" as Backend
+participant "Monoova API" as Monoova
+participant "Customer's Bank" as CustomerBank
+actor "Customer" as Customer
+
+skinparam sequenceMessageAlign center
+
+== Step 1: Initiate Verification ==
+
+Admin -> Backend: Request to verify a customer's 
+bank account (BSB/Account Number)
+activate Backend
+
+Backend -> Monoova: **POST /verify/v1/aba/initiate**
+activate Monoova
+note right
+  **Payload:**
+  {
+    "bsb": "123-456",
+    "accountNumber": "789012345",
+    "remitterName": "YourBusinessName"
+  }
+end note
+Monoova --> Backend: HTTP 200 OK
+deactivate Monoova
+
+Backend -> Backend: Store that verification is pending 
+for this account
+Backend --> Admin: Show "Verification initiated" message
+deactivate Backend
+
+... Later (up to 48 hours) ...
+
+Monoova -> CustomerBank: Credit 1c with a unique code 
+in the transaction description
+CustomerBank -> Customer: Makes transaction visible on bank statement
+
+== Step 2: Confirm Verification ==
+
+Customer -> Admin: Provides the 6-digit code from 
+their bank statement
+Admin -> Backend: Submits the code for the customer's account
+activate Backend
+
+Backend -> Monoova: **POST /verify/v1/aba/validate**
+activate Monoova
+note right
+  **Payload:**
+  {
+    "bsb": "123-456",
+    "accountNumber": "789012345",
+    "amount": 0.01,
+    "code": "555555"
+  }
+end note
+Monoova --> Backend: HTTP 200 OK 
+ {"status": "Verified", ...}
+deactivate Monoova
+
+Backend -> Backend: Mark customer's account as 'Verified' in DB
+Backend --> Admin: Show "Account successfully verified"
+deactivate Backend
+
+@enduml
