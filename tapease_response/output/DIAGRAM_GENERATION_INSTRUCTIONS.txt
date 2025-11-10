@@ -1,0 +1,189 @@
+========================================================================
+HOW TO GENERATE VISUAL DIAGRAMS FROM PLANTUML FILES
+========================================================================
+
+You have two PlantUML (.puml) files that need to be converted to PNG images:
+1. comprehensive_payment_flow.puml (NEW - detailed flow)
+2. payment_flow.puml (ORIGINAL - simpler flow)
+
+------------------------------------------------------------------------
+OPTION 1: ONLINE PLANTUML EDITOR (EASIEST - NO INSTALLATION)
+------------------------------------------------------------------------
+
+1. Open your web browser
+2. Go to: http://www.plantuml.com/plantuml/uml/
+3. Open "comprehensive_payment_flow.puml" in a text editor
+4. Copy ALL the contents (Ctrl+A, then Ctrl+C)
+5. Paste into the online editor (Ctrl+V)
+6. The diagram will generate automatically
+7. Right-click on the generated diagram
+8. Select "Save Image As..."
+9. Save as: comprehensive_payment_flow.png
+10. Repeat for payment_flow.puml
+
+Alternative Online Tools:
+- https://plantuml-editor.kkeisuke.com/
+- https://www.planttext.com/
+
+------------------------------------------------------------------------
+OPTION 2: COMMAND LINE (Linux/WSL)
+------------------------------------------------------------------------
+
+# Install PlantUML (one-time setup)
+sudo apt-get update
+sudo apt-get install -y plantuml
+
+# Navigate to output folder
+cd /mnt/c/Users/hhsid/cli_root/tapease_response/output
+
+# Generate diagrams
+plantuml comprehensive_payment_flow.puml
+plantuml payment_flow.puml
+
+# This will create:
+# - comprehensive_payment_flow.png
+# - payment_flow.png
+
+------------------------------------------------------------------------
+OPTION 3: VS CODE EXTENSION (If using Visual Studio Code)
+------------------------------------------------------------------------
+
+1. Open VS Code
+2. Install "PlantUML" extension by jebbs
+   - Go to Extensions (Ctrl+Shift+X)
+   - Search for "PlantUML"
+   - Click Install
+
+3. Open comprehensive_payment_flow.puml
+4. Press Alt+D to preview the diagram
+5. Right-click on the preview
+6. Select "Export Current Diagram"
+7. Choose PNG format
+8. Save as: comprehensive_payment_flow.png
+
+9. Repeat for payment_flow.puml
+
+------------------------------------------------------------------------
+OPTION 4: PLANTUML DESKTOP JAR (Cross-platform)
+------------------------------------------------------------------------
+
+Prerequisites: Java must be installed
+
+1. Download PlantUML JAR:
+   https://plantuml.com/download
+   File: plantuml.jar
+
+2. Save plantuml.jar to:
+   /mnt/c/Users/hhsid/cli_root/tapease_response/output/
+
+3. Open command prompt/terminal
+
+4. Navigate to output folder:
+   cd /mnt/c/Users/hhsid/cli_root/tapease_response/output
+
+5. Run:
+   java -jar plantuml.jar comprehensive_payment_flow.puml
+   java -jar plantuml.jar payment_flow.puml
+
+6. PNG files will be generated automatically
+
+------------------------------------------------------------------------
+RECOMMENDED APPROACH
+------------------------------------------------------------------------
+
+For quickest results with no installation:
+
+→ Use OPTION 1 (Online PlantUML Editor)
+→ Takes less than 5 minutes
+→ No software installation required
+→ Works on any computer with web browser
+
+------------------------------------------------------------------------
+WHAT TO DO WITH THE GENERATED IMAGES
+------------------------------------------------------------------------
+
+Once you have generated the PNG images:
+
+1. Review them to ensure they look correct
+2. Include them in your ANZ submission package:
+   - Attach comprehensive_payment_flow.png to email
+   - Reference in ANZ_Response_Complete.md
+   - Can also paste into Word/PDF document
+
+3. The comprehensive_payment_flow.png is the PRIMARY diagram
+   that ANZ requested - it shows:
+   - Card transaction processing (Fiserv ecosystem)
+   - PCI DSS scope boundaries
+   - Daily settlement (Payin)
+   - Payout calculation
+   - Three payout methods
+   - Audit and compliance
+
+------------------------------------------------------------------------
+TROUBLESHOOTING
+------------------------------------------------------------------------
+
+Problem: Online editor shows syntax error
+Solution: Ensure you copied the ENTIRE file including @startuml at top
+         and @enduml at bottom
+
+Problem: Diagram looks too small
+Solution: Most tools allow zoom. You can also adjust in the .puml file
+         by adding at the top:
+         scale 2.0
+
+Problem: Some text is cut off
+Solution: The online editor sometimes has rendering issues. Try a
+         different online tool or use the desktop option.
+
+Problem: Java not installed (for Option 4)
+Solution: Download Java from: https://www.java.com/download/
+         Or use Option 1 (online) which doesn't need Java.
+
+------------------------------------------------------------------------
+FILE LOCATIONS
+------------------------------------------------------------------------
+
+Source Files (PlantUML):
+/mnt/c/Users/hhsid/cli_root/tapease_response/output/comprehensive_payment_flow.puml
+/mnt/c/Users/hhsid/cli_root/tapease_response/output/payment_flow.puml
+
+Generated Files (PNG) - Will be created:
+/mnt/c/Users/hhsid/cli_root/tapease_response/output/comprehensive_payment_flow.png
+/mnt/c/Users/hhsid/cli_root/tapease_response/output/payment_flow.png
+
+------------------------------------------------------------------------
+NEXT STEPS AFTER GENERATING DIAGRAMS
+------------------------------------------------------------------------
+
+1. ✅ Generate comprehensive_payment_flow.png
+2. ✅ Generate payment_flow.png (optional - original version)
+3. ✅ Review both diagrams for accuracy
+4. ✅ Include comprehensive_payment_flow.png in ANZ submission
+5. ✅ Complete remaining data fields in ANZ_Response_Complete.md
+6. ✅ Submit to ANZ before deadline (12 Nov 2025)
+
+------------------------------------------------------------------------
+QUESTIONS?
+------------------------------------------------------------------------
+
+If you have trouble generating the diagrams:
+- The comprehensive payment flow information is also fully described
+  in text format in ANZ_Response_Complete.md
+- You can use the existing Highlevel_Flow.png as a backup
+- Contact PlantUML support: https://forum.plantuml.net/
+
+------------------------------------------------------------------------
+TIME ESTIMATE
+------------------------------------------------------------------------
+
+Using Option 1 (Online): 5 minutes
+Using Option 2 (Command line): 10 minutes (including installation)
+Using Option 3 (VS Code): 10 minutes (including extension install)
+Using Option 4 (Java JAR): 15 minutes (including setup)
+
+Recommended: Option 1 for speed and simplicity.
+
+========================================================================
+END OF INSTRUCTIONS
+========================================================================

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api-docs.monoova.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

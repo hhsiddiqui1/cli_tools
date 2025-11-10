@@ -1,0 +1,49 @@
+@startuml
+title "Tapease Payment Flow"
+autonumber
+
+actor Customer
+participant "Clover Terminal" as Terminal
+participant "Fiserv" as Fiserv
+participant "Customer's Bank" as CustomerBank
+participant "Tapease" as Tapease
+participant "ANZ Bank" as ANZ
+actor "Merchant" as Merchant
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant bordercolor DeepSkyBlue
+skinparam sequenceParticipantBackgroundColor Aqua
+skinparam sequenceArrowColor DeepSkyBlue
+skinparam sequenceLifeLineBorderColor blue
+skinparam sequenceLifeLineBackgroundColor #A9DCDF
+
+Customer -> Terminal: Pays fare
+Terminal -> Fiserv: Process transaction
+Fiserv -> CustomerBank: Authorize/Debit
+CustomerBank --> Fiserv: Authorization/Debit confirmation
+Fiserv --> Terminal: Transaction result
+
+group Daily Settlement
+    Fiserv -> Tapease: End of day transaction report / Realtime APIs
+    Fiserv -> ANZ: Transfers funds (Payin) to Tapease account
+end
+
+group Merchant Payout
+    Tapease -> Tapease: Calculate merchant payouts (deduct fees)
+    Tapease -> Tapease: Calculate deduct fees
+    alt Payid to the Merchant
+        Tapease -> ANZ: Initiate electronic transfer to Merchant \nusing PayId
+        ANZ -> Merchant: Funds received
+    else  Bank Transfer to the Merchant
+        Tapease -> ANZ: Initiate electronic transfer to Merchant \nusing account Transfer
+        ANZ -> Merchant: Funds received
+    else Cash Payment
+        Tapease -> ANZ: Withdraw cash for merchant payout
+        Tapease <- ANZ: Cash received
+        Tapease -> Merchant: Pays cash
+    end
+end
+
+@enduml

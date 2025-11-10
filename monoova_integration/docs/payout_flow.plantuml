@@ -38,18 +38,23 @@ else Validation Succeeds
     Backend -> Monoova: **POST /financial/v2/transaction/execute**
     activate Monoova
     note right
-      **Payload (NPP Example):**
+      **Payload (NPP PayID Example):**
       {
-        "callerUniqueReference": "payout-ref-xyz123",
-        "source": { "accountNumber": "YOUR_mACCOUNT" },
+        "uniqueReference": "f484ec18-6e1f-481b-a4bf-bea515d8lk34",
+        "totalAmount": 100,
+        "paymentSource": "mAccount",
+        "mAccount": { "token": "6279059726039800" },
+        "description": "NPP payment to PayID",
         "disbursements": [
           {
-            "uniqueReference": "cust-payout-abc456",
-            "npp": {
-              "to": { "payId": { "payId": "customer@example.com", "payIdType": "Email" } }
+            "disbursementMethod": "NppCreditPayId",
+            "toNppCreditPayIdDetails": {
+              "payId": "customer@example.com",
+              "payIdType": "Email",
+              "accountName": "Customer Name"
             },
-            "amount": 950.00,
-            "description": "Your payout"
+            "amount": 100,
+            "lodgementReference": "Payment reference"
           }
         ]
       }

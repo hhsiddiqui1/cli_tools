@@ -1,0 +1,34 @@
+@startuml
+!theme vibrant
+
+title Tapease Technology Stack
+
+cloud "AWS Cloud" {
+    actor "Developer" as Dev
+
+    node "Frontend (Next.js)" as Frontend {
+        component "React App"
+    }
+
+    node "Backend (FastAPI)" as Backend {
+        component "Python API"
+    }
+
+    database "PostgreSQL DB" as DB {
+        component "RDS"
+    }
+
+    node "AWS Lambda" as Lambda {
+        component "Python Functions"
+    }
+
+    Dev -> Frontend : Develops & Deploys
+    Frontend -> Backend : HTTPS API Calls
+    Backend -> DB : Reads/Writes Data
+    Backend --> Lambda : Triggers Functions
+}
+
+actor "End User" as User
+User --> Frontend : Interacts via Browser
+
+@enduml

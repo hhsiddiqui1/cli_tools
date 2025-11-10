@@ -1,0 +1,101 @@
+@startuml
+title "Tapease Payment Flow - Comprehensive End-to-End Flow\n(Independent Selling Organization with Fiserv)"
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 100
+
+' Define participants with clear roles
+actor "Customer\n(Taxi Passenger)" as Customer
+participant "Clover Terminal\n(Fiserv Managed)" as Terminal #LightBlue
+participant "Fiserv\n(Payment Processor/Acquirer)" as Fiserv #LightGreen
+participant "Card Network\n(Visa/Mastercard)" as CardNetwork #LightYellow
+participant "Customer's Bank\n(Issuing Bank)" as CustomerBank #LightPink
+participant "Tapease\n(ISO - No Card Data Access)" as Tapease #LightCyan
+database "Tapease Backend\n(Transaction Records Only)" as TapeaseDB #LightGray
+participant "ANZ Bank\n(Tapease Account)" as ANZ #Orange
+actor "Merchant\n(Taxi Driver)" as Merchant
+
+' Card data handling boundary
+note across: **PCI DSS SCOPE BOUNDARY** - Card data stays within Fiserv ecosystem
+
+== 1. TRANSACTION PROCESSING (Card Present) ==
+autonumber
+
+Customer -> Terminal: Inserts/Taps Card at Terminal
+note right: Physical card present\n(EMV Chip or Contactless)
+
+Terminal -> Terminal: Reads Card Data (Encrypted)
+note right: P2PE Encryption\nCard data NEVER leaves\nFiserv ecosystem
+
+Terminal -> Fiserv: Transmit Encrypted Transaction\n(Amount, Merchant ID, Terminal ID)
+note right: Direct connection\nTapease has NO access\nto card data
+
+Fiserv -> CardNetwork: Authorization Request
+CardNetwork -> CustomerBank: Authorize Transaction
+CustomerBank --> CardNetwork: Authorization Response\n(Approved/Declined)
+CardNetwork --> Fiserv: Authorization Response
+Fiserv --> Terminal: Transaction Result
+Terminal --> Customer: Receipt (Approved/Declined)
+
+note across: **SETTLEMENT PHASE** - Money movement
+
+== 2. DAILY SETTLEMENT (Payin to Tapease) ==
+
+Fiserv -> Fiserv: End of Day Settlement\nCalculation for all merchants
+
+Fiserv -> ANZ: Bulk Settlement Transfer\n(Total of all merchant transactions\nminus Fiserv fees)
+note right: Single daily transfer\nfor all merchant transactions\nunder Tapease ISO
+
+Fiserv -> TapeaseDB: Transaction Report via API\n(Merchant ID, Terminal ID, Amount,\nTimestamp, Status)\n**NO CARD DATA**
+note right: Reports contain:\n- Transaction amounts\n- Merchant identifiers\n- Terminal IDs\n- Transaction status\n**NO PAN or cardholder data**
+
+ANZ --> Tapease: Settlement Funds Received\n(Available Balance)
+
+== 3. PAYOUT CALCULATION (Tapease Internal Process) ==
+
+Tapease -> TapeaseDB: Query Transaction Reports
+TapeaseDB --> Tapease: Transaction Data by Merchant
+
+Tapease -> Tapease: Calculate Merchant Payouts:\n- Gross Transaction Amount\n- Less: Tapease Service Fee\n- Less: Processing Fees (if applicable)\n= Net Payout Amount
+
+Tapease -> TapeaseDB: Create Payout Instructions\n(Merchant ID, Amount, Method,\nBank Details/PayID)
+note right: Payout record created with:\n- Merchant bank details\n- Payment method\n- Amount\n- Status: PENDING
+
+== 4. MERCHANT PAYOUT (3 Methods) ==
+
+alt Method 1: Bank Transfer (EFT)
+    Tapease -> ANZ: Initiate EFT Transfer\n(Merchant Bank: BSB + Account No)
+    ANZ -> Merchant: Direct Credit to Account
+    ANZ --> Tapease: Transfer Confirmation
+    Tapease -> TapeaseDB: Update Payout Status: COMPLETED
+
+else Method 2: PayID Transfer
+    Tapease -> ANZ: Initiate PayID Transfer\n(PayID: Email or Mobile)
+    ANZ -> Merchant: PayID Transfer
+    ANZ --> Tapease: Transfer Confirmation
+    Tapease -> TapeaseDB: Update Payout Status: COMPLETED
+
+else Method 3: Cash Payment
+    Tapease -> ANZ: ATM/Branch Cash Withdrawal\n(For merchant cash payout)
+    note right: Cash withdrawal recorded\nwith merchant reference
+    ANZ --> Tapease: Cash Withdrawn
+    Tapease -> Merchant: Physical Cash Payment
+    
+    Tapease -> TapeaseDB: Update Payout Status: COMPLETED\n(Attach receipt reference)
+end
+
+== 5. AUDIT & RECONCILIATION ==
+
+Tapease -> TapeaseDB: Daily Reconciliation:\n- Payin from Fiserv (via ANZ)\n- Payouts to Merchants (all methods)\n- Outstanding Balances\n- Fee Collections
+
+note over Tapease, TapeaseDB: Complete audit trail maintained:\n- All transaction records\n- All payout records\n- Cash withdrawal logs
+
+== 6. REPORTING & COMPLIANCE ==
+
+Tapease -> Tapease: Generate Reports:\n- AML/CTF monitoring\n- Cash handling logs\n- Merchant verification status\n- Transaction anomalies
+
+note across: **KEY COMPLIANCE POINTS**\n1. Tapease NEVER handles card data (Fiserv manages)\n2. Complete audit trail for all payouts\n3. KYC/AML checks on all merchants\n4. Cash payments tracked\n5. Daily reconciliation Payin vs Payout
+
+@enduml
